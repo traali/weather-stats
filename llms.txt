@@ -1,0 +1,24 @@
+# weather-stats — LLM Context & Architectural Summary
+
+## Project Summary
+`weather-stats` is the 7th sovereign monastery of the Finnish Youth Sports Federation, delivering localized weather forecasts, turf traction analysis, Finnish 30/30 lightning safety alerts, animated WMS radar playback, and W3C/Anthropic-compliant WebMCP agent tools.
+
+## Architecture & Key Decisions
+- **Strict Monastic Sovereignty**: Standalone React 19 + TypeScript + TailwindCSS v4 application with independent quality gates (`npm run check` = `tsc --noEmit` + `eslint` + `vitest`).
+- **Zero Mock Fallback**: In accordance with youth athlete safety invariants, the system never fabricates synthetic weather or fake lightning strikes. Offline or degraded network scenarios resolve to deterministic cached observations flagged with `isCacheFallback: true`.
+- **WebMCP Tri-Mounting**: Exposes `get_venue_weather_forecast`, `get_pitch_lightning_risk`, and `get_radar_satellite_layer` on `document.modelContext`, `navigator.modelContext`, and `window.modelContext`.
+- **Cross-Frame postMessage Bridge**: Enables seamless, secure cross-origin embedding inside Pelipäivä and sovereign sports centers with guaranteed resolution within a 500 ms SLA.
+- **Nova Design System**: Utilizes semantic tokens, liquid glassmorphism, responsive `clamp()` fluid typography, and tactile spring motion.
+
+## File Structure
+- `src/domain/`: Pure meteorological calculations (`meteorology.ts`, `turfSlickness.ts`, `lightningSafety.ts`).
+- `src/services/`: FMI WFS/WMS integration (`fmiService.ts`, `weatherCache.ts`).
+- `src/components/`: Nova UI components (`MatchdayCardWeatherBadge.tsx`, `HeroMatchCardWeather.tsx`, `SatelliteEmbedDrawer.tsx`, `LightningMapCircle.tsx`, `RadarPlayer.tsx`).
+- `src/mcp-app.ts`: WebMCP registry, tool definitions, and `postMessage` bridge.
+- `public/`: Standalone widgets (`mcp-weather.html`, `favicon.svg`).
+- `tests/`: Deterministic unit, invariant, and WebMCP test suites.
+
+## Contribution & Verification Guide
+- Always run `npm run check` before submitting changes.
+- Ensure all meteorological formulas have corresponding invariant tests.
+- Prohibit unrendered template placeholders (`[object Object]`, `[PVM]`, `undefined`, `null`, `NaN`).

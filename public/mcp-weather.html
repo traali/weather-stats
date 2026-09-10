@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather Stats MCP Widget</title>
+  <style>
+    :root {
+      --color-canvas: #090d16;
+      --color-surface-glass: rgba(17, 24, 39, 0.75);
+      --color-border-hairline: rgba(255, 255, 255, 0.08);
+      --color-weather-sky: #38bdf8;
+      --color-weather-rain: #60a5fa;
+      --color-weather-freeze: #a5f3fc;
+      --color-weather-turf: #10b981;
+      --color-weather-storm: #f59e0b;
+      --color-weather-danger: #ef4444;
+      --color-text-primary: #f9fafb;
+      --color-text-secondary: #9ca3af;
+      --nv-text-xs: clamp(0.694rem, 0.65rem + 0.22vw, 0.8rem);
+      --nv-text-sm: clamp(0.833rem, 0.78rem + 0.27vw, 0.96rem);
+      --nv-text-base: clamp(1rem, 0.93rem + 0.33vw, 1.2rem);
+      --nv-text-lg: clamp(1.2rem, 1.1rem + 0.45vw, 1.5rem);
+      --nv-text-xl: clamp(1.44rem, 1.3rem + 0.63vw, 1.875rem);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--color-canvas);
+      color: var(--color-text-primary);
+      padding: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .widget-card {
+      background: var(--color-surface-glass);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--color-border-hairline);
+      border-radius: 16px;
+      padding: 16px;
+      width: 100%;
+      max-width: 360px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.36);
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .venue-title {
+      font-size: var(--nv-text-sm);
+      font-weight: 600;
+      color: var(--color-text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .badge {
+      font-size: var(--nv-text-xs);
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .badge-turf-dry { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .badge-turf-slick { background: rgba(96, 165, 250, 0.15); color: #93c5fd; border: 1px solid rgba(96, 165, 250, 0.3); }
+    .badge-turf-frozen { background: rgba(165, 243, 252, 0.15); color: #a5f3fc; border: 1px solid rgba(165, 243, 252, 0.3); }
+    .badge-cache { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .temp-row {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .temp-primary {
+      font-size: var(--nv-text-xl);
+      font-weight: 700;
+      color: var(--color-text-primary);
+    }
+    .feels-like {
+      font-size: var(--nv-text-xs);
+      color: var(--color-text-secondary);
+    }
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--color-border-hairline);
+    }
+    .metric-item {
+      font-size: var(--nv-text-xs);
+      color: var(--color-text-secondary);
+    }
+    .metric-value {
+      font-weight: 600;
+      color: var(--color-text-primary);
+      margin-top: 2px;
+    }
+    .alert-banner {
+      margin-top: 12px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: var(--nv-text-xs);
+      display: none;
+    }
+    .alert-danger {
+      display: block;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+    }
+    .alert-watch {
+      display: block;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fde68a;
+    }
+  </style>
+</head>
+<body>
+  <div class="widget-card" id="card">
+    <div class="header">
+      <span class="venue-title" id="venueName">Töölön Pallokenttä</span>
+      <span class="badge badge-turf-dry" id="turfBadge">Kenttä: Kuiva</span>
+    </div>
+    <div class="temp-row">
+      <span class="temp-primary" id="temp">14.5°C</span>
+      <span class="feels-like" id="feelsLike">Tuntuu kuin 13°C</span>
+    </div>
+    <div id="rainCountdown" style="font-size: var(--nv-text-xs); color: var(--color-weather-rain); margin-bottom: 6px;"></div>
+    <div class="metrics-grid">
+      <div class="metric-item">
+        <span>Tuuli / Puuska</span>
+        <div class="metric-value" id="wind">3.2 / 5.8 m/s</div>
+      </div>
+      <div class="metric-item">
+        <span>Sade</span>
+        <div class="metric-value" id="precip">0.0 mm/h</div>
+      </div>
+    </div>
+    <div id="alertBanner" class="alert-banner"></div>
+  </div>
+
+  <script>
+    // Handshake: ext-apps protocol
+    window.addEventListener('message', (event) => {
+      const data = event.data;
+      if (!data) return;
+
+      if (data.type === 'mcp:init') {
+        const target = event.source || window;
+        target.postMessage({ type: 'mcp:ready', protocolVersion: '2026-01' }, '*');
+      } else if (data.type === 'mcp:update' && data.payload) {
+        updateView(data.payload);
+      }
+    });
+
+    // Notify opener or parent that widget is ready
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage({ type: 'mcp:ready', protocolVersion: '2026-01' }, '*');
+    }
+
+    function updateView(data) {
+      if (!data) return;
+      if (data.venueName) document.getElementById('venueName').textContent = data.venueName;
+      if (typeof data.temperatureC === 'number' && Number.isFinite(data.temperatureC)) {
+        document.getElementById('temp').textContent = `${data.temperatureC.toFixed(1)}°C`;
+      }
+      if (typeof data.feelsLikeC === 'number' && Number.isFinite(data.feelsLikeC)) {
+        document.getElementById('feelsLike').textContent = `Tuntuu kuin ${data.feelsLikeC.toFixed(1)}°C`;
+      }
+      if (typeof data.windSpeedMs === 'number' && Number.isFinite(data.windSpeedMs)) {
+        const gust = typeof data.windGustMs === 'number' && Number.isFinite(data.windGustMs)
+          ? ` / ${data.windGustMs.toFixed(1)}`
+          : '';
+        document.getElementById('wind').textContent = `${data.windSpeedMs.toFixed(1)}${gust} m/s`;
+      }
+      if (typeof data.precipitationMmh === 'number' && Number.isFinite(data.precipitationMmh)) {
+        document.getElementById('precip').textContent = `${data.precipitationMmh.toFixed(1)} mm/h`;
+      }
+      if (data.turfConditionLabelFi) {
+        const tb = document.getElementById('turfBadge');
+        tb.textContent = `Kenttä: ${data.turfConditionLabelFi}`;
+        tb.className = `badge badge-turf-${data.turfCondition || 'dry'}`;
+      }
+      if (data.rainOnsetLabel) {
+        const rc = document.getElementById('rainCountdown');
+        rc.textContent = data.rainOnsetLabel;
+        rc.style.display = 'block';
+      }
+      if (data.safetyAdvisoryFi || data.alertMessage) {
+        const ab = document.getElementById('alertBanner');
+        ab.textContent = data.safetyAdvisoryFi || data.alertMessage;
+        ab.className = `alert-banner ${data.status === 'danger' ? 'alert-danger' : 'alert-watch'}`;
+      }
+    }
+
+    // Parse URL params
+    const params = new URLSearchParams(window.location.search);
+    const initialData = {};
+    const venue = params.get('venueName') || (params.get('venueId') ? params.get('venueId').toUpperCase() : '');
+    if (venue) initialData.venueName = venue;
+    if (params.has('temp')) {
+      const parsedTemp = parseFloat(params.get('temp'));
+      if (Number.isFinite(parsedTemp)) initialData.temperatureC = parsedTemp;
+    }
+    if (params.has('feelsLike')) {
+      const parsedFeels = parseFloat(params.get('feelsLike'));
+      if (Number.isFinite(parsedFeels)) initialData.feelsLikeC = parsedFeels;
+    }
+    if (params.get('turf')) initialData.turfCondition = params.get('turf');
+    if (params.get('turfLabel')) initialData.turfConditionLabelFi = params.get('turfLabel');
+    if (params.get('rainOnset')) initialData.rainOnsetLabel = params.get('rainOnset');
+    updateView(initialData);
+  </script>
+</body>
+</html>

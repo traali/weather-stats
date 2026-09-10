@@ -1,0 +1,91 @@
+@import "tailwindcss";
+
+@theme {
+  /* Surfaces & Liquid Glassmorphism */
+  --color-canvas: #090d16;
+  --color-surface-1: #111827;
+  --color-surface-2: #1f2937;
+  --color-surface-3: #374151;
+  --color-surface-glass: rgba(17, 24, 39, 0.75);
+
+  /* Hairlines & Glass Borders */
+  --color-border-hairline: rgba(255, 255, 255, 0.08);
+  --color-border-glass: rgba(255, 255, 255, 0.14);
+
+  /* Semantic Weather Accents */
+  --color-weather-sky: #38bdf8;
+  --color-weather-rain: #60a5fa;
+  --color-weather-storm: #f59e0b;
+  --color-weather-danger: #ef4444;
+  --color-weather-freeze: #a5f3fc;
+  --color-weather-turf: #10b981;
+
+  /* Text Hierarchy */
+  --color-text-primary: #f9fafb;
+  --color-text-secondary: #9ca3af;
+  --color-text-muted: #6b7280;
+
+  /* Font Families */
+  --font-display: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", monospace;
+}
+
+:root {
+  font-family: var(--font-display);
+  color-scheme: dark;
+  background-color: var(--color-canvas);
+  color: var(--color-text-primary);
+  -webkit-font-smoothing: antialiased;
+
+  /* Mandatory Nova Fluid Typography (Rule 7 clamp formulas) */
+  --nv-text-xs: clamp(0.694rem, 0.65rem + 0.22vw, 0.8rem);
+  --nv-text-sm: clamp(0.833rem, 0.78rem + 0.27vw, 0.96rem);
+  --nv-text-base: clamp(1rem, 0.93rem + 0.33vw, 1.2rem);
+  --nv-text-lg: clamp(1.2rem, 1.1rem + 0.45vw, 1.5rem);
+  --nv-text-xl: clamp(1.44rem, 1.3rem + 0.63vw, 1.875rem);
+  --nv-text-2xl: clamp(1.728rem, 1.53rem + 0.89vw, 2.34rem);
+  --nv-text-3xl: clamp(2.074rem, 1.79rem + 1.27vw, 2.93rem);
+  --nv-text-hero: clamp(2.488rem, 2.09rem + 1.78vw, 3.66rem);
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100dvh;
+  background-color: var(--color-canvas);
+}
+
+/* Nova Liquid Glass Utility Classes */
+.glass-panel {
+  background: var(--color-surface-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--color-border-glass);
+}
+
+.glass-pill {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--color-border-hairline);
+}
+
+/* Pulsing radar halo for fresh lightning strikes (< 15 min) */
+@keyframes strike-pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+  }
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+  }
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
+
+.strike-pulse-indicator {
+  animation: strike-pulse 2s infinite ease-in-out;
+}

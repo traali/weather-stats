@@ -1,0 +1,24 @@
+# Lefthook - Sovereign Monastic Quality Gate for Weather Stats
+pre-commit:
+  parallel: true
+  commands:
+    anti-slop-tokens:
+      run: node ../scripts/git-guard.mjs tokens {staged_files}
+      glob: "*.{ts,tsx,js,jsx,json,md,html}"
+    secrets:
+      run: node ../scripts/git-guard.mjs secrets {staged_files}
+      glob: "*"
+    lint:
+      run: npx eslint {staged_files}
+      glob: "*.{ts,tsx,js,jsx}"
+
+commit-msg:
+  commands:
+    conventional-commit:
+      run: node ../scripts/git-guard.mjs commit-msg {1}
+
+pre-push:
+  parallel: false
+  commands:
+    sovereign-check:
+      run: npm run check
