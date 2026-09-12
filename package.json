@@ -12,7 +12,8 @@
     "check:types": "npm run typecheck",
     "test": "vitest run",
     "check": "npm run typecheck && npm run lint && npm run test",
-    "visit": "node scripts/monastery-visitor.mjs"
+    "visit": "node scripts/monastery-visitor.mjs",
+    "check:neighbors": "node scripts/check-neighbors.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.6",

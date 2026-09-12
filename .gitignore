@@ -25,3 +25,4 @@ dist-ssr
 *.tsbuildinfo
 .agent/
 .agents/
+.agent/visitations/neighbors-*.json

@@ -5,7 +5,7 @@
 
 export const CONTRACT_VERSION = '1.0.0' as const;
 
-export type SupportedSport = 'football' | 'volleyball' | 'floorball' | 'basketball' | 'other';
+export type SupportedSport = 'football' | 'volleyball' | 'floorball' | 'basketball' | 'weather' | 'other';
 
 export interface MatchdayContextContract {
   eventId: string;
@@ -19,7 +19,7 @@ export interface MatchdayContextContract {
     latitude: number;
     longitude: number;
   };
-  association?: 'palloliitto' | 'salibandy' | 'basket' | 'torneopal' | 'other';
+  association?: 'palloliitto' | 'salibandy' | 'basket' | 'torneopal' | 'fmi' | 'other';
   externalId?: string;
 }
 

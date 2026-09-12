@@ -74,3 +74,7 @@ Do NOT put volatile facts in `AGENTS.md`. Single sources of truth:
 - Library versions: `package.json`
 - Recent history: `CHANGELOG.md` and git log
 - Architecture decisions: `ROLL.md` and `docs/`
+
+## Neighbor check
+`npm run visit` includes `scripts/check-neighbors.mjs`: peer AGENTS.md + canonical contract fields + 5-point plans. Do not drop a required contract field without a major version.
+
