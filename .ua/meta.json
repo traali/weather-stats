@@ -1,0 +1,9 @@
+{
+  "tool": "federation-understand",
+  "compatibleWith": "Egonex-AI/Understand-Anything 1.0.0",
+  "generatedAt": "2026-09-12T10:44:08.625Z",
+  "repo": "weather-stats",
+  "commit": "27ae780d1080efb7e66b56f254b7632827d686a8",
+  "nodeCount": 109,
+  "edgeCount": 111
+}

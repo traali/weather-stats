@@ -26,3 +26,4 @@ dist-ssr
 .agent/
 .agents/
 .agent/visitations/neighbors-*.json
+.ua/intermediate/

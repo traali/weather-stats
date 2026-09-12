@@ -1,0 +1,2510 @@
+{
+  "version": "1.0.0",
+  "kind": "codebase",
+  "project": {
+    "name": "weather-stats",
+    "languages": [
+      "javascript",
+      "typescript"
+    ],
+    "frameworks": [
+      "react",
+      "vite",
+      "vitest"
+    ],
+    "description": "Monastery weather-stats",
+    "analyzedAt": "2026-09-12T10:44:08.621Z",
+    "gitCommitHash": "27ae780d1080efb7e66b56f254b7632827d686a8"
+  },
+  "nodes": [
+    {
+      "id": "pipeline:.github/workflows/cd.yml",
+      "type": "pipeline",
+      "name": "cd.yml",
+      "summary": "CI/CD workflow",
+      "tags": [
+        "ci"
+      ],
+      "complexity": "simple",
+      "filePath": ".github/workflows/cd.yml"
+    },
+    {
+      "id": "pipeline:.github/workflows/monastic-visit.yml",
+      "type": "pipeline",
+      "name": "monastic-visit.yml",
+      "summary": "CI/CD workflow",
+      "tags": [
+        "ci"
+      ],
+      "complexity": "simple",
+      "filePath": ".github/workflows/monastic-visit.yml"
+    },
+    {
+      "id": "document:AGENTS.md",
+      "type": "document",
+      "name": "AGENTS.md",
+      "summary": "AGENTS.md — The Rule of Weather Stats",
+      "tags": [
+        "docs"
+      ],
+      "complexity": "moderate",
+      "filePath": "AGENTS.md"
+    },
+    {
+      "id": "document:README.md",
+      "type": "document",
+      "name": "README.md",
+      "summary": "🌦️ Weather Stats & Meteorological Intelligence",
+      "tags": [
+        "docs"
+      ],
+      "complexity": "simple",
+      "filePath": "README.md"
+    },
+    {
+      "id": "document:ROLL.md",
+      "type": "document",
+      "name": "ROLL.md",
+      "summary": "ROLL.md — The Chronicle of Weather Stats",
+      "tags": [
+        "docs"
+      ],
+      "complexity": "simple",
+      "filePath": "ROLL.md"
+    },
+    {
+      "id": "document:docs/plans/HOUSE_TEST_SPEC.md",
+      "type": "document",
+      "name": "HOUSE_TEST_SPEC.md",
+      "summary": "Weather Stats — 5-point test spec",
+      "tags": [
+        "docs"
+      ],
+      "complexity": "simple",
+      "filePath": "docs/plans/HOUSE_TEST_SPEC.md"
+    },
+    {
+      "id": "file:eslint.config.js",
+      "type": "file",
+      "name": "eslint.config.js",
+      "summary": "extends: [",
+      "tags": [
+        "config"
+      ],
+      "complexity": "simple",
+      "filePath": "eslint.config.js"
+    },
+    {
+      "id": "config:federation.neighbors.json",
+      "type": "config",
+      "name": "federation.neighbors.json",
+      "summary": "Config federation.neighbors.json",
+      "tags": [
+        "config"
+      ],
+      "complexity": "simple",
+      "filePath": "federation.neighbors.json"
+    },
+    {
+      "id": "config:lefthook.yml",
+      "type": "config",
+      "name": "lefthook.yml",
+      "summary": "Config lefthook.yml",
+      "tags": [
+        "config"
+      ],
+      "complexity": "simple",
+      "filePath": "lefthook.yml"
+    },
+    {
+      "id": "document:llms.txt",
+      "type": "document",
+      "name": "llms.txt",
+      "summary": "weather-stats — LLM Context & Architectural Summary",
+      "tags": [
+        "docs"
+      ],
+      "complexity": "simple",
+      "filePath": "llms.txt"
+    },
+    {
+      "id": "config:package.json",
+      "type": "config",
+      "name": "package.json",
+      "summary": "Config package.json",
+      "tags": [
+        "config"
+      ],
+      "complexity": "simple",
+      "filePath": "package.json"
+    },
+    {
+      "id": "file:scripts/check-neighbors.mjs",
+      "type": "file",
+      "name": "check-neighbors.mjs",
+      "summary": "#!/usr/bin/env node",
+      "tags": [
+        "tooling"
+      ],
+      "complexity": "complex",
+      "filePath": "scripts/check-neighbors.mjs"
+    },
+    {
+      "id": "endpoint:scripts/check-neighbors.mjs:taso",
+      "type": "endpoint",
+      "name": "Torneopal/TASO",
+      "summary": "Association REST client",
+      "tags": [
+        "taso",
+        "tooling"
+      ],
+      "complexity": "moderate",
+      "filePath": "scripts/check-neighbors.mjs"
+    },
+    {
+      "id": "file:scripts/git-guard.mjs",
+      "type": "file",
+      "name": "git-guard.mjs",
+      "summary": "#!/usr/bin/env node",
+      "tags": [
+        "tooling"
+      ],
+      "complexity": "simple",
+      "filePath": "scripts/git-guard.mjs"
+    },
+    {
+      "id": "file:scripts/monastery-visitor.mjs",
+      "type": "file",
+      "name": "monastery-visitor.mjs",
+      "summary": "const ROOT = process.cwd();",
+      "tags": [
+        "tooling"
+      ],
+      "complexity": "simple",
+      "filePath": "scripts/monastery-visitor.mjs"
+    },
+    {
+      "id": "file:scripts/understand.mjs",
+      "type": "file",
+      "name": "understand.mjs",
+      "summary": "#!/usr/bin/env node",
+      "tags": [
+        "tooling"
+      ],
+      "complexity": "complex",
+      "filePath": "scripts/understand.mjs"
+    },
+    {
+      "id": "endpoint:scripts/understand.mjs:taso",
+      "type": "endpoint",
+      "name": "Torneopal/TASO",
+      "summary": "Association REST client",
+      "tags": [
+        "taso",
+        "tooling"
+      ],
+      "complexity": "moderate",
+      "filePath": "scripts/understand.mjs"
+    },
+    {
+      "id": "file:src/App.tsx",
+      "type": "file",
+      "name": "App.tsx",
+      "summary": "VenueWeatherForecastResult,",
+      "tags": [
+        "ui"
+      ],
+      "complexity": "complex",
+      "filePath": "src/App.tsx"
+    },
+    {
+      "id": "function:src/App.tsx:App",
+      "type": "function",
+      "name": "App",
+      "summary": "function App in src/App.tsx",
+      "tags": [
+        "ui",
+        "function"
+      ],
+      "complexity": "simple",
+      "filePath": "src/App.tsx",
+      "lineRange": [
+        19,
+        19
+      ]
+    },
+    {
+      "id": "file:src/components/HeroMatchCardWeather.tsx",
+      "type": "file",
+      "name": "HeroMatchCardWeather.tsx",
+      "summary": "interface HeroMatchCardWeatherProps {",
+      "tags": [
+        "ui"
+      ],
+      "complexity": "moderate",
+      "filePath": "src/components/HeroMatchCardWeather.tsx"
+    },
+    {
+      "id": "function:src/components/HeroMatchCardWeather.tsx:HeroMatchCardWeather",
+      "type": "function",
+      "name": "HeroMatchCardWeather",
+      "summary": "function HeroMatchCardWeather in src/components/HeroMatchCardWeather.tsx",
+      "tags": [
+        "ui",
+        "function"
+      ],
+      "complexity": "simple",
+      "filePath": "src/components/HeroMatchCardWeather.tsx",
+      "lineRange": [
+        12,
+        12
+      ]
+    },
+    {
+      "id": "file:src/components/LightningMapCircle.tsx",
+      "type": "file",
+      "name": "LightningMapCircle.tsx",
+      "summary": "interface LightningMapCircleProps {",
+      "tags": [
+        "ui"
+      ],
+      "complexity": "moderate",
+      "filePath": "src/components/LightningMapCircle.tsx"
+    },
+    {
+      "id": "function:src/components/LightningMapCircle.tsx:LightningMapCircle",
+      "type": "function",
+      "name": "LightningMapCircle",
+      "summary": "function LightningMapCircle in src/components/LightningMapCircle.tsx",
+      "tags": [
+        "ui",
+        "function"
+      ],
+      "complexity": "simple",
+      "filePath": "src/components/LightningMapCircle.tsx",
+      "lineRange": [
+        12,
+        12
+      ]
+    },
+    {
+      "id": "file:src/components/MatchdayCardWeatherBadge.tsx",
+      "type": "file",
+      "name": "MatchdayCardWeatherBadge.tsx",
+      "summary": "interface MatchdayCardWeatherBadgeProps {",
+      "tags": [
+        "ui"
+      ],
+      "complexity": "moderate",
+      "filePath": "src/components/MatchdayCardWeatherBadge.tsx"
+    },
+    {
+      "id": "function:src/components/MatchdayCardWeatherBadge.tsx:MatchdayCardWeatherBadge",
+      "type": "function",
+      "name": "MatchdayCardWeatherBadge",
+      "summary": "function MatchdayCardWeatherBadge in src/components/MatchdayCardWeatherBadge.tsx",
+      "tags": [
+        "ui",
+        "function"
+      ],
+      "complexity": "simple",
+      "filePath": "src/components/MatchdayCardWeatherBadge.tsx",
+      "lineRange": [
+        11,
+        11
+      ]
+    },
+    {
+      "id": "file:src/components/RadarPlayer.tsx",
+      "type": "file",
+      "name": "RadarPlayer.tsx",
+      "summary": "interface RadarPlayerProps {",
+      "tags": [
+        "ui"
+      ],
+      "complexity": "moderate",
+      "filePath": "src/components/RadarPlayer.tsx"
+    },
+    {
+      "id": "function:src/components/RadarPlayer.tsx:RadarPlayer",
+      "type": "function",
+      "name": "RadarPlayer",
+      "summary": "function RadarPlayer in src/components/RadarPlayer.tsx",
+      "tags": [
+        "ui",
+        "function"
+      ],
+      "complexity": "simple",
+      "filePath": "src/components/RadarPlayer.tsx",
+      "lineRange": [
+        12,
+        12
+      ]
+    },
+    {
+      "id": "file:src/components/SatelliteEmbedDrawer.tsx",
+      "type": "file",
+      "name": "SatelliteEmbedDrawer.tsx",
+      "summary": "Coordinates,",
+      "tags": [
+        "ui"
+      ],
+      "complexity": "moderate",
+      "filePath": "src/components/SatelliteEmbedDrawer.tsx"
+    },
+    {
+      "id": "function:src/components/SatelliteEmbedDrawer.tsx:SatelliteEmbedDrawer",
+      "type": "function",
+      "name": "SatelliteEmbedDrawer",
+      "summary": "function SatelliteEmbedDrawer in src/components/SatelliteEmbedDrawer.tsx",
+      "tags": [
+        "ui",
+        "function"
+      ],
+      "complexity": "simple",
+      "filePath": "src/components/SatelliteEmbedDrawer.tsx",
+      "lineRange": [
+        22,
+        22
+      ]
+    },
+    {
+      "id": "file:src/domain/lightningSafety.ts",
+      "type": "file",
+      "name": "lightningSafety.ts",
+      "summary": "lat1: number,",
+      "tags": [
+        "app"
+      ],
+      "complexity": "moderate",
+      "filePath": "src/domain/lightningSafety.ts"
+    },
+    {
+      "id": "function:src/domain/lightningSafety.ts:haversineDistanceKm",
+      "type": "function",
+      "name": "haversineDistanceKm",
+      "summary": "function haversineDistanceKm in src/domain/lightningSafety.ts",
+      "tags": [
+        "app",
+        "function"
+      ],
+      "complexity": "simple",
+      "filePath": "src/domain/lightningSafety.ts",
+      "lineRange": [
+        16,
+        16
+      ]
+    },
+    {
+      "id": "function:src/domain/lightningSafety.ts:evaluatePitchLightningRisk",
+      "type": "function",
+      "name": "evaluatePitchLightningRisk",
+      "summary": "function evaluatePitchLightningRisk in src/domain/lightningSafety.ts",
+      "tags": [
+        "app",
+        "function"
+      ],
+      "complexity": "simple",
+      "filePath": "src/domain/lightningSafety.ts",
+      "lineRange": [
+        35,
+        35
+      ]
+    },
+    {
+      "id": "file:src/domain/meteorology.ts",
+      "type": "file",
+      "name": "meteorology.ts",
+      "summary": "if (tempC > 10.0 || windSpeedMs < 1.79) {",
+      "tags": [
+        "app"
+      ],
+      "complexity": "complex",
+      "filePath": "src/domain/meteorology.ts"
+    },
+    {
+      "id": "function:src/domain/meteorology.ts:calculateSiplePasselWindChill",
+      "type": "function",
+      "name": "calculateSiplePasselWindChill",
+      "summary": "function calculateSiplePasselWindChill in src/domain/meteorology.ts",
+      "tags": [
+        "app",
+        "function"
+      ],
+      "complexity": "simple",
+      "filePath": "src/domain/meteorology.ts",
+      "lineRange": [
+        17,
+        17
+      ]
+    },
+    {
+      "id": "function:src/domain/meteorology.ts:calculateJagtiWindChill",
+      "type": "function",
+      "name": "calculateJagtiWindChill",
+      "summary": "function calculateJagtiWindChill in src/domain/meteorology.ts",
+      "tags": [
+        "app",
+        "function"
+      ],
+      "complexity": "simple",
+      "filePath": "src/domain/meteorology.ts",
+      "lineRange": [
+        33,
+        33
+      ]
+    },
+    {
+      "id": "function:src/domain/meteorology.ts:calculateFmiFeelsLike",
+      "type": "function",
+      "name": "calculateFmiFeelsLike",
+      "summary": "function calculateFmiFeelsLike in src/domain/meteorology.ts",
+      "tags": [
+        "app",
+        "function"
+      ],
+      "complexity": "simple",
+      "filePath": "src/domain/meteorology.ts",
+      "lineRange": [
+        52,
+        52
+      ]
+    },
+    {
+      "id": "function:src/domain/meteorology.ts:calculateRothfuszHeatIndex",
+      "type": "function",
+      "name": "calculateRothfuszHeatIndex",
+      "summary": "function calculateRothfuszHeatIndex in src/domain/meteorology.ts",
+      "tags": [
+        "app",
+        "function"
+      ],
+      "complexity": "simple",
+      "filePath": "src/domain/meteorology.ts",
+      "lineRange": [
+        67,
+        67
+      ]
+    },
+    {
+      "id": "function:src/domain/meteorology.ts:calculateSummerSimmerIndex",
+      "type": "function",
+      "name": "calculateSummerSimmerIndex",
+      "summary": "function calculateSummerSimmerIndex in src/domain/meteorology.ts",
+      "tags": [
+        "app",
+        "function"
+      ],
+      "complexity": "simple",
+      "filePath": "src/domain/meteorology.ts",
+      "lineRange": [
+        104,
+        104
+      ]
+    },
+    {
+      "id": "function:src/domain/meteorology.ts:calculateApparentTemperature",
+      "type": "function",
+      "name": "calculateApparentTemperature",
+      "summary": "function calculateApparentTemperature in src/domain/meteorology.ts",
+      "tags": [
+        "app",
+        "function"
+      ],
+      "complexity": "simple",
+      "filePath": "src/domain/meteorology.ts",
+      "lineRange": [
+        120,
+        120
+      ]
+    },
+    {
+      "id": "function:src/domain/meteorology.ts:getWindAdvisoryBadge",
+      "type": "function",
+      "name": "getWindAdvisoryBadge",
+      "summary": "function getWindAdvisoryBadge in src/domain/meteorology.ts",
+      "tags": [
+        "app",
+        "function"
+      ],
+      "complexity": "simple",
+      "filePath": "src/domain/meteorology.ts",
+      "lineRange": [
+        144,
+        144
+      ]
+    },
+    {
+      "id": "function:src/domain/meteorology.ts:getRainOnsetLabel",
+      "type": "function",
+      "name": "getRainOnsetLabel",
+      "summary": "function getRainOnsetLabel in src/domain/meteorology.ts",
+      "tags": [
+        "app",
+        "function"
+      ],
+      "complexity": "simple",
+      "filePath": "src/domain/meteorology.ts",
+      "lineRange": [
+        163,
+        163
+      ]
+    },
+    {
+      "id": "function:src/domain/meteorology.ts:formatMatchdayWeatherBriefing",
+      "type": "function",
+      "name": "formatMatchdayWeatherBriefing",
+      "summary": "function formatMatchdayWeatherBriefing in src/domain/meteorology.ts",
+      "tags": [
+        "app",
+        "function"
+      ],
+      "complexity": "simple",
+      "filePath": "src/domain/meteorology.ts",
+      "lineRange": [
+        203,
+        203
+      ]
+    },
+    {
+      "id": "file:src/domain/turfSlickness.ts",
+      "type": "file",
+      "name": "turfSlickness.ts",
+      "summary": "condition: TurfCondition;",
+      "tags": [
+        "app"
+      ],
+      "complexity": "simple",
+      "filePath": "src/domain/turfSlickness.ts"
+    },
+    {
+      "id": "function:src/domain/turfSlickness.ts:evaluateTurfSlickness",
+      "type": "function",
+      "name": "evaluateTurfSlickness",
+      "summary": "function evaluateTurfSlickness in src/domain/turfSlickness.ts",
+      "tags": [
+        "app",
+        "function"
+      ],
+      "complexity": "simple",
+      "filePath": "src/domain/turfSlickness.ts",
+      "lineRange": [
+        20,
+        20
+      ]
+    },
+    {
+      "id": "class:src/domain/turfSlickness.ts:TurfSlicknessEvaluation",
+      "type": "class",
+      "name": "TurfSlicknessEvaluation",
+      "summary": "class TurfSlicknessEvaluation in src/domain/turfSlickness.ts",
+      "tags": [
+        "app",
+        "class"
+      ],
+      "complexity": "simple",
+      "filePath": "src/domain/turfSlickness.ts",
+      "lineRange": [
+        12,
+        12
+      ]
+    },
+    {
+      "id": "file:src/main.tsx",
+      "type": "file",
+      "name": "main.tsx",
+      "summary": "registerWeatherWebMCP();",
+      "tags": [
+        "ui"
+      ],
+      "complexity": "simple",
+      "filePath": "src/main.tsx"
+    },
+    {
+      "id": "file:src/mcp-app.ts",
+      "type": "file",
+      "name": "mcp-app.ts",
+      "summary": "fetchVenueWeatherForecast,",
+      "tags": [
+        "app"
+      ],
+      "complexity": "complex",
+      "filePath": "src/mcp-app.ts"
+    },
+    {
+      "id": "function:src/mcp-app.ts:registerWeatherWebMCP",
+      "type": "function",
+      "name": "registerWeatherWebMCP",
+      "summary": "function registerWeatherWebMCP in src/mcp-app.ts",
+      "tags": [
+        "app",
+        "function"
+      ],
+      "complexity": "simple",
+      "filePath": "src/mcp-app.ts",
+      "lineRange": [
+        103,
+        103
+      ]
+    },
+    {
+      "id": "class:src/mcp-app.ts:McpToolResponse",
+      "type": "class",
+      "name": "McpToolResponse",
+      "summary": "class McpToolResponse in src/mcp-app.ts",
+      "tags": [
+        "app",
+        "class"
+      ],
+      "complexity": "simple",
+      "filePath": "src/mcp-app.ts",
+      "lineRange": [
+        23,
+        23
+      ]
+    },
+    {
+      "id": "class:src/mcp-app.ts:ModelContextTool",
+      "type": "class",
+      "name": "ModelContextTool",
+      "summary": "class ModelContextTool in src/mcp-app.ts",
+      "tags": [
+        "app",
+        "class"
+      ],
+      "complexity": "simple",
+      "filePath": "src/mcp-app.ts",
+      "lineRange": [
+        41,
+        41
+      ]
+    },
+    {
+      "id": "class:src/mcp-app.ts:ModelContextRegistry",
+      "type": "class",
+      "name": "ModelContextRegistry",
+      "summary": "class ModelContextRegistry in src/mcp-app.ts",
+      "tags": [
+        "app",
+        "class"
+      ],
+      "complexity": "simple",
+      "filePath": "src/mcp-app.ts",
+      "lineRange": [
+        54,
+        54
+      ]
+    },
+    {
+      "id": "class:src/mcp-app.ts:WebMcpRequestMessage",
+      "type": "class",
+      "name": "WebMcpRequestMessage",
+      "summary": "class WebMcpRequestMessage in src/mcp-app.ts",
+      "tags": [
+        "app",
+        "class"
+      ],
+      "complexity": "simple",
+      "filePath": "src/mcp-app.ts",
+      "lineRange": [
+        71,
+        71
+      ]
+    },
+    {
+      "id": "class:src/mcp-app.ts:WebMcpResponseMessage",
+      "type": "class",
+      "name": "WebMcpResponseMessage",
+      "summary": "class WebMcpResponseMessage in src/mcp-app.ts",
+      "tags": [
+        "app",
+        "class"
+      ],
+      "complexity": "simple",
+      "filePath": "src/mcp-app.ts",
+      "lineRange": [
+        81,
+        81
+      ]
+    },
+    {
+      "id": "file:src/services/fmiService.ts",
+      "type": "file",
+      "name": "fmiService.ts",
+      "summary": "Coordinates,",
+      "tags": [
+        "service"
+      ],
+      "complexity": "complex",
+      "filePath": "src/services/fmiService.ts"
+    },
+    {
+      "id": "function:src/services/fmiService.ts:calculateWeatherBbox",
+      "type": "function",
+      "name": "calculateWeatherBbox",
+      "summary": "function calculateWeatherBbox in src/services/fmiService.ts",
+      "tags": [
+        "service",
+        "function"
+      ],
+      "complexity": "simple",
+      "filePath": "src/services/fmiService.ts",
+      "lineRange": [
+        55,
+        55
+      ]
+    },
+    {
+      "id": "function:src/services/fmiService.ts:buildWmsTileUrl",
+      "type": "function",
+      "name": "buildWmsTileUrl",
+      "summary": "function buildWmsTileUrl in src/services/fmiService.ts",
+      "tags": [
+        "service",
+        "function"
+      ],
+      "complexity": "simple",
+      "filePath": "src/services/fmiService.ts",
+      "lineRange": [
+        74,
+        74
+      ]
+    },
+    {
+      "id": "function:src/services/fmiService.ts:fetchVenueWeatherForecast",
+      "type": "function",
+      "name": "fetchVenueWeatherForecast",
+      "summary": "function fetchVenueWeatherForecast in src/services/fmiService.ts",
+      "tags": [
+        "service",
+        "function"
+      ],
+      "complexity": "simple",
+      "filePath": "src/services/fmiService.ts",
+      "lineRange": [
+        99,
+        99
+      ]
+    },
+    {
+      "id": "function:src/services/fmiService.ts:fetchPitchLightningRisk",
+      "type": "function",
+      "name": "fetchPitchLightningRisk",
+      "summary": "function fetchPitchLightningRisk in src/services/fmiService.ts",
+      "tags": [
+        "service",
+        "function"
+      ],
+      "complexity": "simple",
+      "filePath": "src/services/fmiService.ts",
+      "lineRange": [
+        195,
+        195
+      ]
+    },
+    {
+      "id": "function:src/services/fmiService.ts:getRadarSatelliteLayer",
+      "type": "function",
+      "name": "getRadarSatelliteLayer",
+      "summary": "function getRadarSatelliteLayer in src/services/fmiService.ts",
+      "tags": [
+        "service",
+        "function"
+      ],
+      "complexity": "simple",
+      "filePath": "src/services/fmiService.ts",
+      "lineRange": [
+        266,
+        266
+      ]
+    },
+    {
+      "id": "function:src/services/fmiService.ts:FMI_ENDPOINTS",
+      "type": "function",
+      "name": "FMI_ENDPOINTS",
+      "summary": "function FMI_ENDPOINTS in src/services/fmiService.ts",
+      "tags": [
+        "service",
+        "function"
+      ],
+      "complexity": "simple",
+      "filePath": "src/services/fmiService.ts",
+      "lineRange": [
+        40,
+        40
+      ]
+    },
+    {
+      "id": "endpoint:src/services/fmiService.ts:taso",
+      "type": "endpoint",
+      "name": "Torneopal/TASO",
+      "summary": "Association REST client",
+      "tags": [
+        "taso",
+        "service"
+      ],
+      "complexity": "moderate",
+      "filePath": "src/services/fmiService.ts"
+    },
+    {
+      "id": "file:src/services/weatherCache.ts",
+      "type": "file",
+      "name": "weatherCache.ts",
+      "summary": "Coordinates,",
+      "tags": [
+        "service"
+      ],
+      "complexity": "complex",
+      "filePath": "src/services/weatherCache.ts"
+    },
+    {
+      "id": "function:src/services/weatherCache.ts:clearWeatherCache",
+      "type": "function",
+      "name": "clearWeatherCache",
+      "summary": "function clearWeatherCache in src/services/weatherCache.ts",
+      "tags": [
+        "service",
+        "function"
+      ],
+      "complexity": "simple",
+      "filePath": "src/services/weatherCache.ts",
+      "lineRange": [
+        109,
+        109
+      ]
+    },
+    {
+      "id": "function:src/services/weatherCache.ts:saveForecastToCache",
+      "type": "function",
+      "name": "saveForecastToCache",
+      "summary": "function saveForecastToCache in src/services/weatherCache.ts",
+      "tags": [
+        "service",
+        "function"
+      ],
+      "complexity": "simple",
+      "filePath": "src/services/weatherCache.ts",
+      "lineRange": [
+        123,
+        123
+      ]
+    },
+    {
+      "id": "function:src/services/weatherCache.ts:saveLightningToCache",
+      "type": "function",
+      "name": "saveLightningToCache",
+      "summary": "function saveLightningToCache in src/services/weatherCache.ts",
+      "tags": [
+        "service",
+        "function"
+      ],
+      "complexity": "simple",
+      "filePath": "src/services/weatherCache.ts",
+      "lineRange": [
+        131,
+        131
+      ]
+    },
+    {
+      "id": "function:src/services/weatherCache.ts:getDeterministicForecastFallback",
+      "type": "function",
+      "name": "getDeterministicForecastFallback",
+      "summary": "function getDeterministicForecastFallback in src/services/weatherCache.ts",
+      "tags": [
+        "service",
+        "function"
+      ],
+      "complexity": "simple",
+      "filePath": "src/services/weatherCache.ts",
+      "lineRange": [
+        139,
+        139
+      ]
+    },
+    {
+      "id": "function:src/services/weatherCache.ts:getDeterministicLightningFallback",
+      "type": "function",
+      "name": "getDeterministicLightningFallback",
+      "summary": "function getDeterministicLightningFallback in src/services/weatherCache.ts",
+      "tags": [
+        "service",
+        "function"
+      ],
+      "complexity": "simple",
+      "filePath": "src/services/weatherCache.ts",
+      "lineRange": [
+        216,
+        216
+      ]
+    },
+    {
+      "id": "class:src/services/weatherCache.ts:CachedVenueSnapshot",
+      "type": "class",
+      "name": "CachedVenueSnapshot",
+      "summary": "class CachedVenueSnapshot in src/services/weatherCache.ts",
+      "tags": [
+        "service",
+        "class"
+      ],
+      "complexity": "simple",
+      "filePath": "src/services/weatherCache.ts",
+      "lineRange": [
+        18,
+        18
+      ]
+    },
+    {
+      "id": "function:src/services/weatherCache.ts:DETERMINISTIC_VENUE_SNAPSHOTS",
+      "type": "function",
+      "name": "DETERMINISTIC_VENUE_SNAPSHOTS",
+      "summary": "function DETERMINISTIC_VENUE_SNAPSHOTS in src/services/weatherCache.ts",
+      "tags": [
+        "service",
+        "function"
+      ],
+      "complexity": "simple",
+      "filePath": "src/services/weatherCache.ts",
+      "lineRange": [
+        33,
+        33
+      ]
+    },
+    {
+      "id": "file:src/types/contracts.ts",
+      "type": "file",
+      "name": "contracts.ts",
+      "summary": "eventId: string;",
+      "tags": [
+        "contract"
+      ],
+      "complexity": "simple",
+      "filePath": "src/types/contracts.ts"
+    },
+    {
+      "id": "class:src/types/contracts.ts:MatchdayContextContract",
+      "type": "class",
+      "name": "MatchdayContextContract",
+      "summary": "class MatchdayContextContract in src/types/contracts.ts",
+      "tags": [
+        "contract",
+        "class"
+      ],
+      "complexity": "simple",
+      "filePath": "src/types/contracts.ts",
+      "lineRange": [
+        10,
+        10
+      ]
+    },
+    {
+      "id": "class:src/types/contracts.ts:WeatherForecastContract",
+      "type": "class",
+      "name": "WeatherForecastContract",
+      "summary": "class WeatherForecastContract in src/types/contracts.ts",
+      "tags": [
+        "contract",
+        "class"
+      ],
+      "complexity": "simple",
+      "filePath": "src/types/contracts.ts",
+      "lineRange": [
+        26,
+        26
+      ]
+    },
+    {
+      "id": "class:src/types/contracts.ts:CrossRepoQueryContract",
+      "type": "class",
+      "name": "CrossRepoQueryContract",
+      "summary": "class CrossRepoQueryContract in src/types/contracts.ts",
+      "tags": [
+        "contract",
+        "class"
+      ],
+      "complexity": "simple",
+      "filePath": "src/types/contracts.ts",
+      "lineRange": [
+        45,
+        45
+      ]
+    },
+    {
+      "id": "class:src/types/contracts.ts:SupportedSport",
+      "type": "class",
+      "name": "SupportedSport",
+      "summary": "class SupportedSport in src/types/contracts.ts",
+      "tags": [
+        "contract",
+        "class"
+      ],
+      "complexity": "simple",
+      "filePath": "src/types/contracts.ts",
+      "lineRange": [
+        8,
+        8
+      ]
+    },
+    {
+      "id": "function:src/types/contracts.ts:CONTRACT_VERSION",
+      "type": "function",
+      "name": "CONTRACT_VERSION",
+      "summary": "function CONTRACT_VERSION in src/types/contracts.ts",
+      "tags": [
+        "contract",
+        "function"
+      ],
+      "complexity": "simple",
+      "filePath": "src/types/contracts.ts",
+      "lineRange": [
+        6,
+        6
+      ]
+    },
+    {
+      "id": "endpoint:src/types/contracts.ts:taso",
+      "type": "endpoint",
+      "name": "Torneopal/TASO",
+      "summary": "Association REST client",
+      "tags": [
+        "taso",
+        "contract"
+      ],
+      "complexity": "moderate",
+      "filePath": "src/types/contracts.ts"
+    },
+    {
+      "id": "file:src/types/weather.ts",
+      "type": "file",
+      "name": "weather.ts",
+      "summary": "lat: number;",
+      "tags": [
+        "app"
+      ],
+      "complexity": "moderate",
+      "filePath": "src/types/weather.ts"
+    },
+    {
+      "id": "class:src/types/weather.ts:Coordinates",
+      "type": "class",
+      "name": "Coordinates",
+      "summary": "class Coordinates in src/types/weather.ts",
+      "tags": [
+        "app",
+        "class"
+      ],
+      "complexity": "simple",
+      "filePath": "src/types/weather.ts",
+      "lineRange": [
+        1,
+        1
+      ]
+    },
+    {
+      "id": "class:src/types/weather.ts:VenueWeatherForecastArgs",
+      "type": "class",
+      "name": "VenueWeatherForecastArgs",
+      "summary": "class VenueWeatherForecastArgs in src/types/weather.ts",
+      "tags": [
+        "app",
+        "class"
+      ],
+      "complexity": "simple",
+      "filePath": "src/types/weather.ts",
+      "lineRange": [
+        9,
+        9
+      ]
+    },
+    {
+      "id": "class:src/types/weather.ts:VenueWeatherForecastResult",
+      "type": "class",
+      "name": "VenueWeatherForecastResult",
+      "summary": "class VenueWeatherForecastResult in src/types/weather.ts",
+      "tags": [
+        "app",
+        "class"
+      ],
+      "complexity": "simple",
+      "filePath": "src/types/weather.ts",
+      "lineRange": [
+        18,
+        18
+      ]
+    },
+    {
+      "id": "class:src/types/weather.ts:PitchLightningRiskArgs",
+      "type": "class",
+      "name": "PitchLightningRiskArgs",
+      "summary": "class PitchLightningRiskArgs in src/types/weather.ts",
+      "tags": [
+        "app",
+        "class"
+      ],
+      "complexity": "simple",
+      "filePath": "src/types/weather.ts",
+      "lineRange": [
+        40,
+        40
+      ]
+    },
+    {
+      "id": "class:src/types/weather.ts:LightningStrikeItem",
+      "type": "class",
+      "name": "LightningStrikeItem",
+      "summary": "class LightningStrikeItem in src/types/weather.ts",
+      "tags": [
+        "app",
+        "class"
+      ],
+      "complexity": "simple",
+      "filePath": "src/types/weather.ts",
+      "lineRange": [
+        48,
+        48
+      ]
+    },
+    {
+      "id": "class:src/types/weather.ts:PitchLightningRiskResult",
+      "type": "class",
+      "name": "PitchLightningRiskResult",
+      "summary": "class PitchLightningRiskResult in src/types/weather.ts",
+      "tags": [
+        "app",
+        "class"
+      ],
+      "complexity": "simple",
+      "filePath": "src/types/weather.ts",
+      "lineRange": [
+        57,
+        57
+      ]
+    },
+    {
+      "id": "class:src/types/weather.ts:RadarSatelliteLayerArgs",
+      "type": "class",
+      "name": "RadarSatelliteLayerArgs",
+      "summary": "class RadarSatelliteLayerArgs in src/types/weather.ts",
+      "tags": [
+        "app",
+        "class"
+      ],
+      "complexity": "simple",
+      "filePath": "src/types/weather.ts",
+      "lineRange": [
+        82,
+        82
+      ]
+    },
+    {
+      "id": "class:src/types/weather.ts:RadarAnimationFrame",
+      "type": "class",
+      "name": "RadarAnimationFrame",
+      "summary": "class RadarAnimationFrame in src/types/weather.ts",
+      "tags": [
+        "app",
+        "class"
+      ],
+      "complexity": "simple",
+      "filePath": "src/types/weather.ts",
+      "lineRange": [
+        91,
+        91
+      ]
+    },
+    {
+      "id": "class:src/types/weather.ts:RadarSatelliteLayerResult",
+      "type": "class",
+      "name": "RadarSatelliteLayerResult",
+      "summary": "class RadarSatelliteLayerResult in src/types/weather.ts",
+      "tags": [
+        "app",
+        "class"
+      ],
+      "complexity": "simple",
+      "filePath": "src/types/weather.ts",
+      "lineRange": [
+        98,
+        98
+      ]
+    },
+    {
+      "id": "class:src/types/weather.ts:TurfCondition",
+      "type": "class",
+      "name": "TurfCondition",
+      "summary": "class TurfCondition in src/types/weather.ts",
+      "tags": [
+        "app",
+        "class"
+      ],
+      "complexity": "simple",
+      "filePath": "src/types/weather.ts",
+      "lineRange": [
+        6,
+        6
+      ]
+    },
+    {
+      "id": "class:src/types/weather.ts:TurfConditionLabelFi",
+      "type": "class",
+      "name": "TurfConditionLabelFi",
+      "summary": "class TurfConditionLabelFi in src/types/weather.ts",
+      "tags": [
+        "app",
+        "class"
+      ],
+      "complexity": "simple",
+      "filePath": "src/types/weather.ts",
+      "lineRange": [
+        7,
+        7
+      ]
+    },
+    {
+      "id": "class:src/types/weather.ts:RadarSatelliteLayerId",
+      "type": "class",
+      "name": "RadarSatelliteLayerId",
+      "summary": "class RadarSatelliteLayerId in src/types/weather.ts",
+      "tags": [
+        "app",
+        "class"
+      ],
+      "complexity": "simple",
+      "filePath": "src/types/weather.ts",
+      "lineRange": [
+        76,
+        76
+      ]
+    },
+    {
+      "id": "file:src/utils/cn.ts",
+      "type": "file",
+      "name": "cn.ts",
+      "summary": "return twMerge(clsx(inputs));",
+      "tags": [
+        "app"
+      ],
+      "complexity": "simple",
+      "filePath": "src/utils/cn.ts"
+    },
+    {
+      "id": "function:src/utils/cn.ts:cn",
+      "type": "function",
+      "name": "cn",
+      "summary": "function cn in src/utils/cn.ts",
+      "tags": [
+        "app",
+        "function"
+      ],
+      "complexity": "simple",
+      "filePath": "src/utils/cn.ts",
+      "lineRange": [
+        4,
+        4
+      ]
+    },
+    {
+      "id": "file:src/vite-env.d.ts",
+      "type": "file",
+      "name": "vite-env.d.ts",
+      "summary": "declare const __APP_VERSION__: string;",
+      "tags": [
+        "app"
+      ],
+      "complexity": "simple",
+      "filePath": "src/vite-env.d.ts"
+    },
+    {
+      "id": "file:tests/adversarialProtocolStress.test.ts",
+      "type": "file",
+      "name": "adversarialProtocolStress.test.ts",
+      "summary": "fetchVenueWeatherForecast,",
+      "tags": [
+        "app"
+      ],
+      "complexity": "complex",
+      "filePath": "tests/adversarialProtocolStress.test.ts"
+    },
+    {
+      "id": "file:tests/adversarialStress.test.ts",
+      "type": "file",
+      "name": "adversarialStress.test.ts",
+      "summary": "calculateSiplePasselWindChill,",
+      "tags": [
+        "app"
+      ],
+      "complexity": "complex",
+      "filePath": "tests/adversarialStress.test.ts"
+    },
+    {
+      "id": "file:tests/domainInvariants.test.ts",
+      "type": "file",
+      "name": "domainInvariants.test.ts",
+      "summary": "getDeterministicForecastFallback,",
+      "tags": [
+        "app"
+      ],
+      "complexity": "moderate",
+      "filePath": "tests/domainInvariants.test.ts"
+    },
+    {
+      "id": "file:tests/fmiService.test.ts",
+      "type": "file",
+      "name": "fmiService.test.ts",
+      "summary": "calculateWeatherBbox,",
+      "tags": [
+        "app"
+      ],
+      "complexity": "moderate",
+      "filePath": "tests/fmiService.test.ts"
+    },
+    {
+      "id": "file:tests/lightningSafety.test.ts",
+      "type": "file",
+      "name": "lightningSafety.test.ts",
+      "summary": "haversineDistanceKm,",
+      "tags": [
+        "app"
+      ],
+      "complexity": "moderate",
+      "filePath": "tests/lightningSafety.test.ts"
+    },
+    {
+      "id": "file:tests/meteorologyInvariants.test.ts",
+      "type": "file",
+      "name": "meteorologyInvariants.test.ts",
+      "summary": "calculateSiplePasselWindChill,",
+      "tags": [
+        "app"
+      ],
+      "complexity": "moderate",
+      "filePath": "tests/meteorologyInvariants.test.ts"
+    },
+    {
+      "id": "file:tests/postMessageBridge.test.ts",
+      "type": "file",
+      "name": "postMessageBridge.test.ts",
+      "summary": "const SLA_MS = process.env.CI ? 2500 : 500;",
+      "tags": [
+        "app"
+      ],
+      "complexity": "moderate",
+      "filePath": "tests/postMessageBridge.test.ts"
+    },
+    {
+      "id": "file:tests/setupDom.ts",
+      "type": "file",
+      "name": "setupDom.ts",
+      "summary": "private listeners: Record<string, Array<(event: unknown) => void>> = {};",
+      "tags": [
+        "app"
+      ],
+      "complexity": "moderate",
+      "filePath": "tests/setupDom.ts"
+    },
+    {
+      "id": "function:tests/setupDom.ts:setupMockDom",
+      "type": "function",
+      "name": "setupMockDom",
+      "summary": "function setupMockDom in tests/setupDom.ts",
+      "tags": [
+        "app",
+        "function"
+      ],
+      "complexity": "simple",
+      "filePath": "tests/setupDom.ts",
+      "lineRange": [
+        41,
+        41
+      ]
+    },
+    {
+      "id": "class:tests/setupDom.ts:MockWindow",
+      "type": "class",
+      "name": "MockWindow",
+      "summary": "class MockWindow in tests/setupDom.ts",
+      "tags": [
+        "app",
+        "class"
+      ],
+      "complexity": "simple",
+      "filePath": "tests/setupDom.ts",
+      "lineRange": [
+        6,
+        6
+      ]
+    },
+    {
+      "id": "file:tests/turfSlickness.test.ts",
+      "type": "file",
+      "name": "turfSlickness.test.ts",
+      "summary": "describe('Turf Slickness State Machine', () => {",
+      "tags": [
+        "app"
+      ],
+      "complexity": "simple",
+      "filePath": "tests/turfSlickness.test.ts"
+    },
+    {
+      "id": "file:tests/webMcpRegistry.test.ts",
+      "type": "file",
+      "name": "webMcpRegistry.test.ts",
+      "summary": "describe('WebMCP Tri-Mount Registry & Model Context Standards', () => {",
+      "tags": [
+        "app"
+      ],
+      "complexity": "moderate",
+      "filePath": "tests/webMcpRegistry.test.ts"
+    },
+    {
+      "id": "config:tsconfig.json",
+      "type": "config",
+      "name": "tsconfig.json",
+      "summary": "Config tsconfig.json",
+      "tags": [
+        "config"
+      ],
+      "complexity": "simple",
+      "filePath": "tsconfig.json"
+    },
+    {
+      "id": "file:vite.config.ts",
+      "type": "file",
+      "name": "vite.config.ts",
+      "summary": "const commitHash = (() => {",
+      "tags": [
+        "config"
+      ],
+      "complexity": "simple",
+      "filePath": "vite.config.ts"
+    },
+    {
+      "id": "concept:the-rule",
+      "type": "concept",
+      "name": "The Rule (AGENTS.md)",
+      "summary": "Supreme house rule, <1500 words",
+      "tags": [
+        "governance"
+      ],
+      "complexity": "simple",
+      "filePath": "AGENTS.md"
+    },
+    {
+      "id": "concept:chapter-of-neighbors",
+      "type": "concept",
+      "name": "Chapter of Neighbors",
+      "summary": "Visit-gate that freezes contracts and peer AGENTS.md",
+      "tags": [
+        "governance",
+        "treaty"
+      ],
+      "complexity": "moderate"
+    },
+    {
+      "id": "schema:src/types/contracts.ts",
+      "type": "schema",
+      "name": "Federation contracts",
+      "summary": "Canonical v1.0.0 treaty adapters",
+      "tags": [
+        "treaty"
+      ],
+      "complexity": "moderate",
+      "filePath": "src/types/contracts.ts"
+    }
+  ],
+  "edges": [
+    {
+      "source": "pipeline:.github/workflows/cd.yml",
+      "target": "document:AGENTS.md",
+      "type": "triggers",
+      "direction": "forward",
+      "weight": 0.4
+    },
+    {
+      "source": "pipeline:.github/workflows/monastic-visit.yml",
+      "target": "document:AGENTS.md",
+      "type": "triggers",
+      "direction": "forward",
+      "weight": 0.4
+    },
+    {
+      "source": "file:scripts/check-neighbors.mjs",
+      "target": "endpoint:scripts/check-neighbors.mjs:taso",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:scripts/understand.mjs",
+      "target": "endpoint:scripts/understand.mjs:taso",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/App.tsx",
+      "target": "function:src/App.tsx:App",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/App.tsx",
+      "target": "file:src/components/MatchdayCardWeatherBadge.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/App.tsx",
+      "target": "file:src/components/HeroMatchCardWeather.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/App.tsx",
+      "target": "file:src/components/SatelliteEmbedDrawer.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/App.tsx",
+      "target": "file:src/types/weather.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/App.tsx",
+      "target": "file:src/services/weatherCache.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/App.tsx",
+      "target": "file:src/domain/meteorology.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/App.tsx",
+      "target": "file:src/domain/lightningSafety.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/HeroMatchCardWeather.tsx",
+      "target": "function:src/components/HeroMatchCardWeather.tsx:HeroMatchCardWeather",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/HeroMatchCardWeather.tsx",
+      "target": "file:src/types/weather.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/LightningMapCircle.tsx",
+      "target": "function:src/components/LightningMapCircle.tsx:LightningMapCircle",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/LightningMapCircle.tsx",
+      "target": "file:src/types/weather.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/MatchdayCardWeatherBadge.tsx",
+      "target": "function:src/components/MatchdayCardWeatherBadge.tsx:MatchdayCardWeatherBadge",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/MatchdayCardWeatherBadge.tsx",
+      "target": "file:src/types/weather.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/RadarPlayer.tsx",
+      "target": "function:src/components/RadarPlayer.tsx:RadarPlayer",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/RadarPlayer.tsx",
+      "target": "file:src/types/weather.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/SatelliteEmbedDrawer.tsx",
+      "target": "function:src/components/SatelliteEmbedDrawer.tsx:SatelliteEmbedDrawer",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/components/SatelliteEmbedDrawer.tsx",
+      "target": "file:src/components/RadarPlayer.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/SatelliteEmbedDrawer.tsx",
+      "target": "file:src/components/LightningMapCircle.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/SatelliteEmbedDrawer.tsx",
+      "target": "file:src/types/weather.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/components/SatelliteEmbedDrawer.tsx",
+      "target": "file:src/services/fmiService.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/domain/lightningSafety.ts",
+      "target": "function:src/domain/lightningSafety.ts:haversineDistanceKm",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/domain/lightningSafety.ts",
+      "target": "function:src/domain/lightningSafety.ts:evaluatePitchLightningRisk",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/domain/lightningSafety.ts",
+      "target": "file:src/types/weather.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/domain/meteorology.ts",
+      "target": "function:src/domain/meteorology.ts:calculateSiplePasselWindChill",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/domain/meteorology.ts",
+      "target": "function:src/domain/meteorology.ts:calculateJagtiWindChill",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/domain/meteorology.ts",
+      "target": "function:src/domain/meteorology.ts:calculateFmiFeelsLike",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/domain/meteorology.ts",
+      "target": "function:src/domain/meteorology.ts:calculateRothfuszHeatIndex",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/domain/meteorology.ts",
+      "target": "function:src/domain/meteorology.ts:calculateSummerSimmerIndex",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/domain/meteorology.ts",
+      "target": "function:src/domain/meteorology.ts:calculateApparentTemperature",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/domain/meteorology.ts",
+      "target": "function:src/domain/meteorology.ts:getWindAdvisoryBadge",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/domain/meteorology.ts",
+      "target": "function:src/domain/meteorology.ts:getRainOnsetLabel",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/domain/meteorology.ts",
+      "target": "function:src/domain/meteorology.ts:formatMatchdayWeatherBriefing",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/domain/turfSlickness.ts",
+      "target": "function:src/domain/turfSlickness.ts:evaluateTurfSlickness",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/domain/turfSlickness.ts",
+      "target": "class:src/domain/turfSlickness.ts:TurfSlicknessEvaluation",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/domain/turfSlickness.ts",
+      "target": "file:src/types/weather.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main.tsx",
+      "target": "file:src/App.tsx",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/main.tsx",
+      "target": "file:src/mcp-app.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/mcp-app.ts",
+      "target": "function:src/mcp-app.ts:registerWeatherWebMCP",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/mcp-app.ts",
+      "target": "class:src/mcp-app.ts:McpToolResponse",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/mcp-app.ts",
+      "target": "class:src/mcp-app.ts:ModelContextTool",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/mcp-app.ts",
+      "target": "class:src/mcp-app.ts:ModelContextRegistry",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/mcp-app.ts",
+      "target": "class:src/mcp-app.ts:WebMcpRequestMessage",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/mcp-app.ts",
+      "target": "class:src/mcp-app.ts:WebMcpResponseMessage",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/mcp-app.ts",
+      "target": "file:src/services/fmiService.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/mcp-app.ts",
+      "target": "file:src/types/weather.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/services/fmiService.ts",
+      "target": "function:src/services/fmiService.ts:calculateWeatherBbox",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/services/fmiService.ts",
+      "target": "function:src/services/fmiService.ts:buildWmsTileUrl",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/services/fmiService.ts",
+      "target": "function:src/services/fmiService.ts:fetchVenueWeatherForecast",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/services/fmiService.ts",
+      "target": "function:src/services/fmiService.ts:fetchPitchLightningRisk",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/services/fmiService.ts",
+      "target": "function:src/services/fmiService.ts:getRadarSatelliteLayer",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/services/fmiService.ts",
+      "target": "function:src/services/fmiService.ts:FMI_ENDPOINTS",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/services/fmiService.ts",
+      "target": "file:src/types/weather.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/services/fmiService.ts",
+      "target": "file:src/domain/meteorology.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/services/fmiService.ts",
+      "target": "file:src/domain/turfSlickness.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/services/fmiService.ts",
+      "target": "file:src/domain/lightningSafety.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/services/fmiService.ts",
+      "target": "file:src/services/weatherCache.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/services/fmiService.ts",
+      "target": "endpoint:src/services/fmiService.ts:taso",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/services/weatherCache.ts",
+      "target": "function:src/services/weatherCache.ts:clearWeatherCache",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/services/weatherCache.ts",
+      "target": "function:src/services/weatherCache.ts:saveForecastToCache",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/services/weatherCache.ts",
+      "target": "function:src/services/weatherCache.ts:saveLightningToCache",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/services/weatherCache.ts",
+      "target": "function:src/services/weatherCache.ts:getDeterministicForecastFallback",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/services/weatherCache.ts",
+      "target": "function:src/services/weatherCache.ts:getDeterministicLightningFallback",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/services/weatherCache.ts",
+      "target": "class:src/services/weatherCache.ts:CachedVenueSnapshot",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/services/weatherCache.ts",
+      "target": "function:src/services/weatherCache.ts:DETERMINISTIC_VENUE_SNAPSHOTS",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/services/weatherCache.ts",
+      "target": "file:src/types/weather.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/services/weatherCache.ts",
+      "target": "file:src/domain/meteorology.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/services/weatherCache.ts",
+      "target": "file:src/domain/turfSlickness.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:src/types/contracts.ts",
+      "target": "class:src/types/contracts.ts:MatchdayContextContract",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/types/contracts.ts",
+      "target": "class:src/types/contracts.ts:WeatherForecastContract",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/types/contracts.ts",
+      "target": "class:src/types/contracts.ts:CrossRepoQueryContract",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/types/contracts.ts",
+      "target": "class:src/types/contracts.ts:SupportedSport",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/types/contracts.ts",
+      "target": "function:src/types/contracts.ts:CONTRACT_VERSION",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/types/contracts.ts",
+      "target": "endpoint:src/types/contracts.ts:taso",
+      "type": "calls",
+      "direction": "forward",
+      "weight": 0.7
+    },
+    {
+      "source": "file:src/types/weather.ts",
+      "target": "class:src/types/weather.ts:Coordinates",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/types/weather.ts",
+      "target": "class:src/types/weather.ts:VenueWeatherForecastArgs",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/types/weather.ts",
+      "target": "class:src/types/weather.ts:VenueWeatherForecastResult",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/types/weather.ts",
+      "target": "class:src/types/weather.ts:PitchLightningRiskArgs",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/types/weather.ts",
+      "target": "class:src/types/weather.ts:LightningStrikeItem",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/types/weather.ts",
+      "target": "class:src/types/weather.ts:PitchLightningRiskResult",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/types/weather.ts",
+      "target": "class:src/types/weather.ts:RadarSatelliteLayerArgs",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/types/weather.ts",
+      "target": "class:src/types/weather.ts:RadarAnimationFrame",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/types/weather.ts",
+      "target": "class:src/types/weather.ts:RadarSatelliteLayerResult",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/types/weather.ts",
+      "target": "class:src/types/weather.ts:TurfCondition",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/types/weather.ts",
+      "target": "class:src/types/weather.ts:TurfConditionLabelFi",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/types/weather.ts",
+      "target": "class:src/types/weather.ts:RadarSatelliteLayerId",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/utils/cn.ts",
+      "target": "function:src/utils/cn.ts:cn",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:tests/adversarialProtocolStress.test.ts",
+      "target": "file:src/mcp-app.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/adversarialProtocolStress.test.ts",
+      "target": "file:tests/setupDom.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/adversarialProtocolStress.test.ts",
+      "target": "file:src/services/fmiService.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/adversarialStress.test.ts",
+      "target": "file:src/domain/meteorology.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/adversarialStress.test.ts",
+      "target": "file:src/domain/turfSlickness.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/adversarialStress.test.ts",
+      "target": "file:src/domain/lightningSafety.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/domainInvariants.test.ts",
+      "target": "file:src/domain/meteorology.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/domainInvariants.test.ts",
+      "target": "file:src/services/weatherCache.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/fmiService.test.ts",
+      "target": "file:src/services/fmiService.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/lightningSafety.test.ts",
+      "target": "file:src/domain/lightningSafety.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/meteorologyInvariants.test.ts",
+      "target": "file:src/domain/meteorology.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/postMessageBridge.test.ts",
+      "target": "file:src/mcp-app.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/postMessageBridge.test.ts",
+      "target": "file:tests/setupDom.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/setupDom.ts",
+      "target": "function:tests/setupDom.ts:setupMockDom",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:tests/setupDom.ts",
+      "target": "class:tests/setupDom.ts:MockWindow",
+      "type": "contains",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:tests/turfSlickness.test.ts",
+      "target": "file:src/domain/turfSlickness.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/webMcpRegistry.test.ts",
+      "target": "file:src/mcp-app.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "file:tests/webMcpRegistry.test.ts",
+      "target": "file:tests/setupDom.ts",
+      "type": "imports",
+      "direction": "forward",
+      "weight": 0.8
+    },
+    {
+      "source": "document:AGENTS.md",
+      "target": "concept:the-rule",
+      "type": "documents",
+      "direction": "forward",
+      "weight": 1
+    },
+    {
+      "source": "file:src/types/contracts.ts",
+      "target": "schema:src/types/contracts.ts",
+      "type": "defines_schema",
+      "direction": "forward",
+      "weight": 1
+    }
+  ],
+  "layers": [
+    {
+      "id": "ci",
+      "name": "Ci",
+      "description": "ci layer",
+      "nodeIds": [
+        "pipeline:.github/workflows/cd.yml",
+        "pipeline:.github/workflows/monastic-visit.yml"
+      ]
+    },
+    {
+      "id": "docs",
+      "name": "Docs",
+      "description": "docs layer",
+      "nodeIds": [
+        "document:AGENTS.md",
+        "document:README.md",
+        "document:ROLL.md",
+        "document:docs/plans/HOUSE_TEST_SPEC.md",
+        "document:llms.txt"
+      ]
+    },
+    {
+      "id": "app",
+      "name": "App",
+      "description": "app layer",
+      "nodeIds": [
+        "file:src/domain/lightningSafety.ts",
+        "function:src/domain/lightningSafety.ts:haversineDistanceKm",
+        "function:src/domain/lightningSafety.ts:evaluatePitchLightningRisk",
+        "file:src/domain/meteorology.ts",
+        "function:src/domain/meteorology.ts:calculateSiplePasselWindChill",
+        "function:src/domain/meteorology.ts:calculateJagtiWindChill",
+        "function:src/domain/meteorology.ts:calculateFmiFeelsLike",
+        "function:src/domain/meteorology.ts:calculateRothfuszHeatIndex",
+        "function:src/domain/meteorology.ts:calculateSummerSimmerIndex",
+        "function:src/domain/meteorology.ts:calculateApparentTemperature",
+        "function:src/domain/meteorology.ts:getWindAdvisoryBadge",
+        "function:src/domain/meteorology.ts:getRainOnsetLabel",
+        "function:src/domain/meteorology.ts:formatMatchdayWeatherBriefing",
+        "file:src/domain/turfSlickness.ts",
+        "function:src/domain/turfSlickness.ts:evaluateTurfSlickness",
+        "class:src/domain/turfSlickness.ts:TurfSlicknessEvaluation",
+        "file:src/mcp-app.ts",
+        "function:src/mcp-app.ts:registerWeatherWebMCP",
+        "class:src/mcp-app.ts:McpToolResponse",
+        "class:src/mcp-app.ts:ModelContextTool",
+        "class:src/mcp-app.ts:ModelContextRegistry",
+        "class:src/mcp-app.ts:WebMcpRequestMessage",
+        "class:src/mcp-app.ts:WebMcpResponseMessage",
+        "file:src/types/weather.ts",
+        "class:src/types/weather.ts:Coordinates",
+        "class:src/types/weather.ts:VenueWeatherForecastArgs",
+        "class:src/types/weather.ts:VenueWeatherForecastResult",
+        "class:src/types/weather.ts:PitchLightningRiskArgs",
+        "class:src/types/weather.ts:LightningStrikeItem",
+        "class:src/types/weather.ts:PitchLightningRiskResult",
+        "class:src/types/weather.ts:RadarSatelliteLayerArgs",
+        "class:src/types/weather.ts:RadarAnimationFrame",
+        "class:src/types/weather.ts:RadarSatelliteLayerResult",
+        "class:src/types/weather.ts:TurfCondition",
+        "class:src/types/weather.ts:TurfConditionLabelFi",
+        "class:src/types/weather.ts:RadarSatelliteLayerId",
+        "file:src/utils/cn.ts",
+        "function:src/utils/cn.ts:cn",
+        "file:src/vite-env.d.ts",
+        "file:tests/adversarialProtocolStress.test.ts",
+        "file:tests/adversarialStress.test.ts",
+        "file:tests/domainInvariants.test.ts",
+        "file:tests/fmiService.test.ts",
+        "file:tests/lightningSafety.test.ts",
+        "file:tests/meteorologyInvariants.test.ts",
+        "file:tests/postMessageBridge.test.ts",
+        "file:tests/setupDom.ts",
+        "function:tests/setupDom.ts:setupMockDom",
+        "class:tests/setupDom.ts:MockWindow",
+        "file:tests/turfSlickness.test.ts",
+        "file:tests/webMcpRegistry.test.ts"
+      ]
+    },
+    {
+      "id": "config",
+      "name": "Config",
+      "description": "config layer",
+      "nodeIds": [
+        "file:eslint.config.js",
+        "config:federation.neighbors.json",
+        "config:lefthook.yml",
+        "config:package.json",
+        "config:tsconfig.json",
+        "file:vite.config.ts"
+      ]
+    },
+    {
+      "id": "tooling",
+      "name": "Tooling",
+      "description": "tooling layer",
+      "nodeIds": [
+        "file:scripts/check-neighbors.mjs",
+        "file:scripts/git-guard.mjs",
+        "file:scripts/monastery-visitor.mjs",
+        "file:scripts/understand.mjs"
+      ]
+    },
+    {
+      "id": "ui",
+      "name": "Ui",
+      "description": "ui layer",
+      "nodeIds": [
+        "file:src/App.tsx",
+        "function:src/App.tsx:App",
+        "file:src/components/HeroMatchCardWeather.tsx",
+        "function:src/components/HeroMatchCardWeather.tsx:HeroMatchCardWeather",
+        "file:src/components/LightningMapCircle.tsx",
+        "function:src/components/LightningMapCircle.tsx:LightningMapCircle",
+        "file:src/components/MatchdayCardWeatherBadge.tsx",
+        "function:src/components/MatchdayCardWeatherBadge.tsx:MatchdayCardWeatherBadge",
+        "file:src/components/RadarPlayer.tsx",
+        "function:src/components/RadarPlayer.tsx:RadarPlayer",
+        "file:src/components/SatelliteEmbedDrawer.tsx",
+        "function:src/components/SatelliteEmbedDrawer.tsx:SatelliteEmbedDrawer",
+        "file:src/main.tsx"
+      ]
+    },
+    {
+      "id": "service",
+      "name": "Service",
+      "description": "service layer",
+      "nodeIds": [
+        "file:src/services/fmiService.ts",
+        "function:src/services/fmiService.ts:calculateWeatherBbox",
+        "function:src/services/fmiService.ts:buildWmsTileUrl",
+        "function:src/services/fmiService.ts:fetchVenueWeatherForecast",
+        "function:src/services/fmiService.ts:fetchPitchLightningRisk",
+        "function:src/services/fmiService.ts:getRadarSatelliteLayer",
+        "function:src/services/fmiService.ts:FMI_ENDPOINTS",
+        "file:src/services/weatherCache.ts",
+        "function:src/services/weatherCache.ts:clearWeatherCache",
+        "function:src/services/weatherCache.ts:saveForecastToCache",
+        "function:src/services/weatherCache.ts:saveLightningToCache",
+        "function:src/services/weatherCache.ts:getDeterministicForecastFallback",
+        "function:src/services/weatherCache.ts:getDeterministicLightningFallback",
+        "class:src/services/weatherCache.ts:CachedVenueSnapshot",
+        "function:src/services/weatherCache.ts:DETERMINISTIC_VENUE_SNAPSHOTS"
+      ]
+    },
+    {
+      "id": "contract",
+      "name": "Contract",
+      "description": "contract layer",
+      "nodeIds": [
+        "file:src/types/contracts.ts",
+        "class:src/types/contracts.ts:MatchdayContextContract",
+        "class:src/types/contracts.ts:WeatherForecastContract",
+        "class:src/types/contracts.ts:CrossRepoQueryContract",
+        "class:src/types/contracts.ts:SupportedSport",
+        "function:src/types/contracts.ts:CONTRACT_VERSION"
+      ]
+    }
+  ],
+  "tour": [
+    {
+      "order": 1,
+      "title": "The Rule",
+      "description": "Read AGENTS.md before changing code.",
+      "nodeIds": [
+        "document:AGENTS.md",
+        "concept:the-rule"
+      ]
+    },
+    {
+      "order": 2,
+      "title": "Treaty",
+      "description": "Contract fields this house must keep.",
+      "nodeIds": [
+        "schema:src/types/contracts.ts"
+      ]
+    },
+    {
+      "order": 3,
+      "title": "Services",
+      "description": "API clients and TASO cache policy.",
+      "nodeIds": [
+        "endpoint:scripts/check-neighbors.mjs:taso",
+        "endpoint:scripts/understand.mjs:taso",
+        "file:src/services/fmiService.ts",
+        "function:src/services/fmiService.ts:calculateWeatherBbox",
+        "function:src/services/fmiService.ts:buildWmsTileUrl",
+        "function:src/services/fmiService.ts:fetchVenueWeatherForecast",
+        "function:src/services/fmiService.ts:fetchPitchLightningRisk",
+        "function:src/services/fmiService.ts:getRadarSatelliteLayer"
+      ]
+    },
+    {
+      "order": 4,
+      "title": "UI",
+      "description": "Pages the family actually opens.",
+      "nodeIds": [
+        "file:src/App.tsx",
+        "file:src/components/HeroMatchCardWeather.tsx",
+        "file:src/components/LightningMapCircle.tsx",
+        "file:src/components/MatchdayCardWeatherBadge.tsx",
+        "file:src/components/RadarPlayer.tsx",
+        "file:src/components/SatelliteEmbedDrawer.tsx",
+        "file:src/main.tsx"
+      ]
+    },
+    {
+      "order": 5,
+      "title": "Visit gate",
+      "description": "npm run visit + check-neighbors.mjs",
+      "nodeIds": [
+        "file:scripts/check-neighbors.mjs",
+        "endpoint:scripts/check-neighbors.mjs:taso"
+      ]
+    }
+  ]
+}

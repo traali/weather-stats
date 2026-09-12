@@ -13,7 +13,8 @@
     "test": "vitest run",
     "check": "npm run typecheck && npm run lint && npm run test",
     "visit": "node scripts/monastery-visitor.mjs",
-    "check:neighbors": "node scripts/check-neighbors.mjs"
+    "check:neighbors": "node scripts/check-neighbors.mjs",
+    "understand": "node scripts/understand.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.6",
