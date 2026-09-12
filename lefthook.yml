@@ -1,12 +1,12 @@
-# Lefthook - Sovereign Monastic Quality Gate for Weather Stats
+# Lefthook — Sovereign gate (independent remote: git-guard is vendored here)
 pre-commit:
   parallel: true
   commands:
     anti-slop-tokens:
-      run: node ../scripts/git-guard.mjs tokens {staged_files}
-      glob: "*.{ts,tsx,js,jsx,json,md,html}"
+      run: node scripts/git-guard.mjs tokens {staged_files}
+      glob: "*.{ts,tsx,js,jsx,json,md,html,mjs}"
     secrets:
-      run: node ../scripts/git-guard.mjs secrets {staged_files}
+      run: node scripts/git-guard.mjs secrets {staged_files}
       glob: "*"
     lint:
       run: npx eslint {staged_files}
@@ -15,7 +15,7 @@ pre-commit:
 commit-msg:
   commands:
     conventional-commit:
-      run: node ../scripts/git-guard.mjs commit-msg {1}
+      run: node scripts/git-guard.mjs commit-msg {1}
 
 pre-push:
   parallel: false
