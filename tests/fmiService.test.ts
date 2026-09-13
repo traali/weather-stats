@@ -11,14 +11,12 @@ describe('FMI Service & WMS Layer Projection Invariants', () => {
   const testCoords = { lat: 60.1873, lng: 24.9258 };
 
   describe('BBOX Projection Math', () => {
-    it('applies 1.8 longitude aspect ratio compensation at Finnish 60°N latitude', () => {
-      const bbox = calculateWeatherBbox(testCoords, 50);
+    it('compensates longitude at Finnish 60°N (1/cos lat ≈ 2.0)', () => {
+      const bbox = calculateWeatherBbox(testCoords, 18);
       const deltaLat = bbox.maxLat - bbox.minLat;
       const deltaLng = bbox.maxLng - bbox.minLng;
-
-      // Expect deltaLng / deltaLat ~= 1.8
       const ratio = deltaLng / deltaLat;
-      expect(ratio).toBeCloseTo(1.8, 1);
+      expect(ratio).toBeCloseTo(1 / Math.cos((testCoords.lat * Math.PI) / 180), 1);
     });
 
     it('centers bounding box correctly around venue coordinates', () => {
@@ -67,6 +65,8 @@ describe('FMI Service & WMS Layer Projection Invariants', () => {
       expect(res.animationLoop[res.animationLoop.length - 1].label).toBe('Nyt (viimeisin)');
       expect(res.currentFrameUrl).toBe(res.animationLoop[res.animationLoop.length - 1].wmsUrl);
       expect(res.uiResourceUri).toContain('ui://weather/radar-drawer');
+      expect(res.basemapUrl).toContain('ows.terrestris.de');
+      expect(res.basemapUrl).toContain(`BBOX=${res.bbox.minLng},${res.bbox.minLat},${res.bbox.maxLng},${res.bbox.maxLat}`);
     });
 
     it('rounds animation timestamps down to 5-minute intervals matching FMI radar cadence', () => {

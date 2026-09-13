@@ -54,10 +54,11 @@ const xmlParser = new XMLParser({
  */
 export function calculateWeatherBbox(
   coords: Coordinates,
-  radiusKm: number = 50
+  radiusKm: number = 18
 ): { minLng: number; minLat: number; maxLng: number; maxLat: number; crs: 'CRS:84' } {
   const deltaLat = radiusKm / 111.32;
-  const deltaLng = deltaLat * 1.8;
+  const cosLat = Math.cos((coords.lat * Math.PI) / 180);
+  const deltaLng = radiusKm / (111.32 * Math.max(0.2, cosLat));
 
   return {
     minLng: Math.round((coords.lng - deltaLng) * 10000) / 10000,
@@ -77,19 +78,20 @@ export function buildWmsTileUrl(
   timestampIso: string
 ): string {
   const bboxStr = `${bbox.minLng},${bbox.minLat},${bbox.maxLng},${bbox.maxLat}`;
+  const size = 'WIDTH=768&HEIGHT=576';
 
   switch (layer) {
     case 'fmi_rain_radar':
-      return `${FMI_ENDPOINTS.openWms}?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=Radar:suomi_dbz_eureffin&STYLES=&CRS=CRS:84&BBOX=${bboxStr}&WIDTH=768&HEIGHT=512&FORMAT=image/png&TRANSPARENT=TRUE&TIME=${encodeURIComponent(timestampIso)}`;
+      return `${FMI_ENDPOINTS.openWms}?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=Radar:suomi_dbz_eureffin&STYLES=&CRS=CRS:84&BBOX=${bboxStr}&${size}&FORMAT=image/png&TRANSPARENT=TRUE&TIME=${encodeURIComponent(timestampIso)}`;
 
     case 'eumetsat_fog':
-      return `${FMI_ENDPOINTS.eumetWms}?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=msg_fes:rgb_fog&STYLES=&CRS=CRS:84&BBOX=${bboxStr}&WIDTH=768&HEIGHT=512&FORMAT=image/jpeg&TIME=${encodeURIComponent(timestampIso)}`;
+      return `${FMI_ENDPOINTS.eumetWms}?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=msg_fes:rgb_fog&STYLES=&CRS=CRS:84&BBOX=${bboxStr}&${size}&FORMAT=image/jpeg&TIME=${encodeURIComponent(timestampIso)}`;
 
     case 'eumetsat_natural':
-      return `${FMI_ENDPOINTS.eumetWms}?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=msg_fes:rgb_natural&STYLES=&CRS=CRS:84&BBOX=${bboxStr}&WIDTH=768&HEIGHT=512&FORMAT=image/jpeg&TIME=${encodeURIComponent(timestampIso)}`;
+      return `${FMI_ENDPOINTS.eumetWms}?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=msg_fes:rgb_natural&STYLES=&CRS=CRS:84&BBOX=${bboxStr}&${size}&FORMAT=image/jpeg&TIME=${encodeURIComponent(timestampIso)}`;
 
     case 'fmi_lightning':
-      return `${FMI_ENDPOINTS.openWms}?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=Observation:lightning&STYLES=&CRS=CRS:84&BBOX=${bboxStr}&WIDTH=768&HEIGHT=512&FORMAT=image/png&TRANSPARENT=TRUE&TIME=${encodeURIComponent(timestampIso)}`;
+      return `${FMI_ENDPOINTS.openWms}?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=Observation:lightning&STYLES=&CRS=CRS:84&BBOX=${bboxStr}&${size}&FORMAT=image/png&TRANSPARENT=TRUE&TIME=${encodeURIComponent(timestampIso)}`;
   }
 }
 
@@ -263,6 +265,16 @@ export async function fetchPitchLightningRisk(
 /**
  * Builds Radar & Satellite Layer configuration with dynamic animation loop frames
  */
+export function buildBasemapUrl(bbox: {
+  minLng: number
+  minLat: number
+  maxLng: number
+  maxLat: number
+}): string {
+  const bboxStr = `${bbox.minLng},${bbox.minLat},${bbox.maxLng},${bbox.maxLat}`
+  return `https://ows.terrestris.de/osm/service?SERVICE=WMS&VERSION=1.1.1&REQUEST=GetMap&LAYERS=OSM-WMS&STYLES=&SRS=EPSG:4326&BBOX=${bboxStr}&WIDTH=768&HEIGHT=576&FORMAT=image/png`
+}
+
 export function getRadarSatelliteLayer(
   args: RadarSatelliteLayerArgs
 ): RadarSatelliteLayerResult {
@@ -270,7 +282,7 @@ export function getRadarSatelliteLayer(
     layer = 'fmi_rain_radar',
     lat,
     lng,
-    radiusKm = 50,
+    radiusKm = 18,
     timestamp,
     frameCount = 6,
   } = args;
@@ -348,6 +360,7 @@ export function getRadarSatelliteLayer(
     legendText: meta.legend,
     center,
     bbox,
+    basemapUrl: buildBasemapUrl(bbox),
     currentFrameUrl,
     animationLoop,
     uiResourceUri,

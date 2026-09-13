@@ -33,7 +33,7 @@ export const SatelliteEmbedDrawer: React.FC<SatelliteEmbedDrawerProps> = ({
       layer: initialLayer,
       lat: venueCoords.lat,
       lng: venueCoords.lng,
-      radiusKm: 50,
+      radiusKm: 18,
       frameCount: 6,
     })
   );
@@ -44,7 +44,7 @@ export const SatelliteEmbedDrawer: React.FC<SatelliteEmbedDrawerProps> = ({
       layer: activeLayer,
       lat: venueCoords.lat,
       lng: venueCoords.lng,
-      radiusKm: 50,
+      radiusKm: 18,
       frameCount: 6,
     });
     setRadarData(data);
@@ -132,6 +132,9 @@ export const SatelliteEmbedDrawer: React.FC<SatelliteEmbedDrawerProps> = ({
             animationLoop={radarData.animationLoop}
             layerTitle={radarData.layerTitle}
             onLayerChange={(l) => setActiveLayer(l)}
+            basemapUrl={radarData.basemapUrl}
+            venueName={venueName}
+            radiusKm={18}
           />
           <div className="text-[11px] text-gray-500 mt-2 px-1">
             {radarData.description} • Päivitysväli {radarData.refreshIntervalMinutes} min.

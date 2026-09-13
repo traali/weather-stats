@@ -110,6 +110,7 @@ export interface RadarSatelliteLayerResult {
     maxLat: number;
     crs: 'CRS:84';
   };
+  basemapUrl: string;
   currentFrameUrl: string;
   animationLoop: RadarAnimationFrame[];
   uiResourceUri: string;

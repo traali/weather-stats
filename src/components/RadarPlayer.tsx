@@ -7,6 +7,9 @@ interface RadarPlayerProps {
   animationLoop: RadarAnimationFrame[];
   layerTitle: string;
   onLayerChange?: (layer: RadarSatelliteLayerId) => void;
+  basemapUrl?: string;
+  venueName?: string;
+  radiusKm?: number;
 }
 
 export const RadarPlayer: React.FC<RadarPlayerProps> = ({
@@ -14,6 +17,9 @@ export const RadarPlayer: React.FC<RadarPlayerProps> = ({
   animationLoop,
   layerTitle,
   onLayerChange,
+  basemapUrl,
+  venueName,
+  radiusKm = 18,
 }) => {
   const [currentIndex, setCurrentIndex] = useState<number>(() =>
     Math.max(0, animationLoop.length - 1)
@@ -95,21 +101,38 @@ export const RadarPlayer: React.FC<RadarPlayerProps> = ({
       </div>
 
       {/* Frame Display Viewport */}
-      <div className="relative aspect-[3/2] w-full overflow-hidden rounded-xl bg-slate-950 border border-white/10 flex items-center justify-center">
+      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl bg-slate-950 border border-white/10">
+        {basemapUrl && (
+          <img
+            src={basemapUrl}
+            alt=""
+            className="absolute inset-0 w-full h-full object-fill select-none pointer-events-none"
+          />
+        )}
         {currentFrame?.wmsUrl ? (
           <img
             src={currentFrame.wmsUrl}
             alt={`Tutkakuva ${currentFrame.label}`}
-            className="w-full h-full object-cover select-none"
+            className="absolute inset-0 w-full h-full object-fill select-none mix-blend-screen opacity-90"
             loading="eager"
             onError={(e) => {
-              // Graceful dark fallback tile if WMS is offline
               (e.currentTarget as HTMLElement).style.display = 'none';
             }}
           />
         ) : (
           <div className="text-xs text-gray-500">Ladataan tutkakuvaa...</div>
         )}
+        {venueName && (
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center pointer-events-none z-10">
+            <div className="w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-white shadow-md" />
+            <div className="mt-1 px-2 py-0.5 rounded-full bg-black/80 text-[10px] font-bold text-white max-w-[200px] truncate">
+              {venueName}
+            </div>
+          </div>
+        )}
+        <div className="absolute bottom-2.5 left-2.5 px-2 py-1 rounded-lg bg-black/70 text-[10px] text-gray-300">
+          Säde: {radiusKm} km • Keskipiste: {venueName || 'Kenttä'}
+        </div>
 
         {/* Current Frame Timestamp Pill */}
         <div className="absolute top-3 right-3 flex items-center gap-2 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 text-xs">
