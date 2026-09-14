@@ -100,6 +100,8 @@ declare global {
   }
 }
 
+let _weatherMessageHandler: ((event: MessageEvent) => void) | null = null;
+
 export function registerWeatherWebMCP(): ModelContextRegistry | undefined {
   if (typeof window === 'undefined') return undefined;
 
@@ -182,7 +184,16 @@ export function registerWeatherWebMCP(): ModelContextRegistry | undefined {
 
   // 1. Tri-mount registry
   if (typeof document !== 'undefined') {
-    document.modelContext = registry;
+    try {
+      Object.defineProperty(document, 'modelContext', {
+        value: registry,
+        configurable: true,
+        enumerable: true,
+        writable: true,
+      });
+    } catch {
+      (document as unknown as { modelContext?: ModelContextRegistry }).modelContext = registry;
+    }
   }
   if (typeof navigator !== 'undefined') {
     try {
@@ -347,7 +358,10 @@ export function registerWeatherWebMCP(): ModelContextRegistry | undefined {
   });
 
   // 5. Cross-frame postMessage listener with 500 ms SLA
-  window.addEventListener('message', async (event: MessageEvent) => {
+  if (_weatherMessageHandler) {
+    window.removeEventListener('message', _weatherMessageHandler);
+  }
+  const messageHandler = async (event: MessageEvent) => {
     const data = event.data;
     if (!data || data.type !== 'webmcp:request' || !data.id) return;
 
@@ -391,7 +405,9 @@ export function registerWeatherWebMCP(): ModelContextRegistry | undefined {
         '*'
       );
     }
-  });
+  };
+  _weatherMessageHandler = messageHandler;
+  window.addEventListener('message', messageHandler);
 
   // 6. Broadcast ready event
   window.dispatchEvent(
