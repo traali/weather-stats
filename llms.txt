@@ -1,5 +1,7 @@
 # weather-stats — LLM Context & Architectural Summary
 
+UI catalog: `docs/UI_COMPONENTS.md` (2026-09-26). Five components. Never invent weather or lightning.
+
 ## Project Summary
 `weather-stats` is the 7th sovereign monastery of the Finnish Youth Sports Federation, delivering localized weather forecasts, turf traction analysis, Finnish 30/30 lightning safety alerts, animated WMS radar playback, and W3C/Anthropic-compliant WebMCP agent tools.
 
