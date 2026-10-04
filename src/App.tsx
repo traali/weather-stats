@@ -10,9 +10,10 @@ import {
 } from './types/weather';
 import {
   DETERMINISTIC_VENUE_SNAPSHOTS,
-  getDeterministicForecastFallback,
+  unavailableForecast,
   getDeterministicLightningFallback,
 } from './services/weatherCache';
+import { fetchPitchLightningRisk, fetchVenueWeatherForecast } from './services/fmiService';
 import { formatMatchdayWeatherBriefing } from './domain/meteorology';
 import { evaluatePitchLightningRisk } from './domain/lightningSafety';
 
@@ -27,31 +28,51 @@ export function App() {
   const activeSnapshot =
     DETERMINISTIC_VENUE_SNAPSHOTS[selectedVenueKey] || DETERMINISTIC_VENUE_SNAPSHOTS.vaiski;
 
-  const nowIso = new Date().toISOString();
   const activeCoords: Coordinates = activeSnapshot.coords;
+  const [kickoffIso, setKickoffIso] = useState(() => new Date().toISOString());
+  const [simulated, setSimulated] = useState(false);
 
   const [forecast, setForecast] = useState<VenueWeatherForecastResult>(() =>
-    getDeterministicForecastFallback(activeCoords, nowIso, activeSnapshot.venueId, activeSnapshot.venueName)
+    unavailableForecast(activeCoords, new Date().toISOString(), activeSnapshot.venueId, activeSnapshot.venueName)
   );
 
   const [lightning, setLightning] = useState<PitchLightningRiskResult>(() =>
     getDeterministicLightningFallback(activeCoords, activeSnapshot.venueName)
   );
 
-  // Update forecast and lightning when venue changes
   useEffect(() => {
     const snap =
       DETERMINISTIC_VENUE_SNAPSHOTS[selectedVenueKey] || DETERMINISTIC_VENUE_SNAPSHOTS.vaiski;
-    const newForecast = getDeterministicForecastFallback(
-      snap.coords,
-      nowIso,
-      snap.venueId,
-      snap.venueName
-    );
-    const newLightning = getDeterministicLightningFallback(snap.coords, snap.venueName);
-    setForecast(newForecast);
-    setLightning(newLightning);
-  }, [selectedVenueKey, nowIso]);
+    let cancel = false;
+    const kickoff = new Date().toISOString();
+    setKickoffIso(kickoff);
+    setSimulated(false);
+    setForecast(unavailableForecast(snap.coords, kickoff, snap.venueId, snap.venueName));
+    setLightning(getDeterministicLightningFallback(snap.coords, snap.venueName));
+
+    Promise.all([
+      fetchVenueWeatherForecast({
+        lat: snap.coords.lat,
+        lng: snap.coords.lng,
+        kickoffTime: kickoff,
+        venueId: snap.venueId,
+        venueName: snap.venueName,
+      }),
+      fetchPitchLightningRisk({
+        lat: snap.coords.lat,
+        lng: snap.coords.lng,
+        venueName: snap.venueName,
+      }),
+    ]).then(([nextForecast, nextLightning]) => {
+      if (cancel) return;
+      setForecast(nextForecast);
+      setLightning(nextLightning);
+    });
+
+    return () => {
+      cancel = true;
+    };
+  }, [selectedVenueKey]);
 
 
   // Inspect WebMCP registration
@@ -89,34 +110,43 @@ export function App() {
       },
     ];
 
-    const simulated = evaluatePitchLightningRisk(
+    const simulatedRisk = evaluatePitchLightningRisk(
       activeCoords,
       simulatedStrikes,
       Date.now(),
       activeSnapshot.venueName,
       false
     );
-    setLightning(simulated);
+    setLightning(simulatedRisk);
+    setSimulated(true);
     setIsDrawerOpen(true);
   };
 
 
   const handleResetLightning = () => {
+    setSimulated(false);
     setLightning(getDeterministicLightningFallback(activeCoords, activeSnapshot.venueName));
+    void fetchPitchLightningRisk({
+      lat: activeCoords.lat,
+      lng: activeCoords.lng,
+      venueName: activeSnapshot.venueName,
+    }).then((next) => setLightning(next));
   };
 
-  const briefingText = formatMatchdayWeatherBriefing({
-    venueName: activeSnapshot.venueName,
-    kickoffTime: nowIso,
-    temperatureC: forecast.temperatureC,
-    feelsLikeC: forecast.feelsLikeC,
-    windSpeedMs: forecast.windSpeedMs,
-    windGustMs: forecast.windGustMs,
-    precipitationMmh: forecast.precipitationMmh,
-    turfConditionLabelFi: forecast.turfConditionLabelFi,
-    windAdvisory: forecast.windAdvisoryBadge,
-    lightningAlert: lightning.alertMessage,
-  });
+  const briefingText = forecast.available
+    ? formatMatchdayWeatherBriefing({
+        venueName: activeSnapshot.venueName,
+        kickoffTime: kickoffIso,
+        temperatureC: forecast.temperatureC,
+        feelsLikeC: forecast.feelsLikeC,
+        windSpeedMs: forecast.windSpeedMs,
+        windGustMs: forecast.windGustMs,
+        precipitationMmh: forecast.precipitationMmh,
+        turfConditionLabelFi: forecast.turfConditionLabelFi,
+        windAdvisory: forecast.windAdvisoryBadge,
+        lightningAlert: simulated ? 'Simulaatio, ei FMI-havainto' : lightning.alertMessage,
+      })
+    : `🌦️ SÄÄTIEDOTE — ${activeSnapshot.venueName}\nSää ei saatavilla. FMI ei palauttanut lukemia. Ei keksitä lämpötilaa eikä tuulta.`;
 
   const handleCopyBriefing = async () => {
     try {
@@ -184,6 +214,7 @@ export function App() {
           <HeroMatchCardWeather
             forecast={forecast}
             lightning={lightning}
+            simulated={simulated}
             onOpenRadar={() => setIsDrawerOpen(true)}
           />
         </section>
@@ -194,28 +225,18 @@ export function App() {
             Sää kentällä
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {Object.entries(DETERMINISTIC_VENUE_SNAPSHOTS).map(([key, snap]) => {
-              const itemForecast = getDeterministicForecastFallback(
-                snap.coords,
-                nowIso,
-                snap.venueId,
-                snap.venueName
-              );
-              return (
-                <div key={key} className="flex flex-col gap-1">
-                  <span className="text-[11px] font-semibold text-gray-400 px-1 truncate">
-                    {snap.venueName}
-                  </span>
-                  <MatchdayCardWeatherBadge
-                    forecast={itemForecast}
-                    onOpenRadar={() => {
-                      setSelectedVenueKey(key);
-                      setIsDrawerOpen(true);
-                    }}
-                  />
-                </div>
-              );
-            })}
+            <div className="flex flex-col gap-1 sm:col-span-2 lg:col-span-3">
+              <span className="text-[11px] font-semibold text-gray-400 px-1 truncate">
+                {activeSnapshot.venueName}
+              </span>
+              <MatchdayCardWeatherBadge
+                forecast={forecast}
+                onOpenRadar={() => setIsDrawerOpen(true)}
+              />
+              <p className="text-[11px] text-gray-500 px-1">
+                Muille kentille ei näytetä keksittyä säätä. Valitse kenttä, niin luku haetaan FMI:stä.
+              </p>
+            </div>
           </div>
         </section>
 

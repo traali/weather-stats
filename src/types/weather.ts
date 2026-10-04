@@ -4,7 +4,7 @@ export interface Coordinates {
 }
 
 export type TurfCondition = 'dry' | 'slick' | 'frozen' | 'snowy';
-export type TurfConditionLabelFi = 'Kuiva' | 'Liukas' | 'Jäätynyt' | 'Luminen';
+export type TurfConditionLabelFi = 'Kuiva' | 'Liukas' | 'Jäätynyt' | 'Luminen' | '—';
 
 export interface VenueWeatherForecastArgs {
   lat: number;
@@ -20,11 +20,11 @@ export interface VenueWeatherForecastResult {
   venueName?: string;
   coordinates: Coordinates;
   kickoffTime: string;
-  temperatureC: number;
-  feelsLikeC: number;
-  windSpeedMs: number;
-  windGustMs: number;
-  precipitationMmh: number;
+  temperatureC: number | null;
+  feelsLikeC: number | null;
+  windSpeedMs: number | null;
+  windGustMs: number | null;
+  precipitationMmh: number | null;
   rainProbabilityPercent?: number;
   rainTimeline: Array<{ time: string; precipitationMmh: number }>;
   rainCountdownMinutes?: number;
@@ -32,6 +32,8 @@ export interface VenueWeatherForecastResult {
   turfCondition: TurfCondition;
   turfConditionLabelFi: TurfConditionLabelFi;
   windAdvisoryBadge?: string;
+  /** False when FMI did not return a reading. Never fill this with a remembered September day. */
+  available: boolean;
   isCacheFallback: boolean;
   cacheTimestamp?: string;
   uiResourceUri: string;
@@ -55,7 +57,7 @@ export interface LightningStrikeItem {
 }
 
 export interface PitchLightningRiskResult {
-  status: 'clear' | 'watch' | 'danger';
+  status: 'clear' | 'watch' | 'danger' | 'unknown';
   nearestStrikeKm?: number;
   nearestStrikeMinutesAgo?: number;
   strikesWithin10kmCount: number;

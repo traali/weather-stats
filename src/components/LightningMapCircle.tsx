@@ -5,7 +5,7 @@ interface LightningMapCircleProps {
   venueCoords: Coordinates;
   venueName?: string;
   strikes: LightningStrikeItem[];
-  status: 'clear' | 'watch' | 'danger';
+  status: 'clear' | 'watch' | 'danger' | 'unknown';
   radiusKm?: number;
 }
 

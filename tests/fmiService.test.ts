@@ -97,9 +97,9 @@ describe('FMI Service & WMS Layer Projection Invariants', () => {
       );
 
       expect(res.isCacheFallback).toBe(true);
+      expect(res.available).toBe(false);
       expect(res.venueId).toBe('vaiski');
-      expect(res.temperatureC).toBeGreaterThan(-30);
-      expect(res.temperatureC).toBeLessThan(40);
+      expect(res.temperatureC).toBeNull();
       expect(res.uiResourceUri).toContain('ui://weather/venue-card');
     });
 
@@ -114,8 +114,9 @@ describe('FMI Service & WMS Layer Projection Invariants', () => {
       );
 
       expect(res.isCacheFallback).toBe(true);
-      expect(res.status).toBe('clear');
+      expect(res.status).toBe('unknown');
       expect(res.strikes.length).toBe(0); // Zero fabricated strikes
+      expect(res.suspendMatchRecommended).toBe(false);
     });
   });
 });

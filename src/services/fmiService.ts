@@ -124,8 +124,8 @@ export async function fetchVenueWeatherForecast(
     let temp = Number.NaN;
     let wind = Number.NaN;
     let gust = Number.NaN;
-    let rain = 0.0;
-    let humidity = 70;
+    let rain = Number.NaN;
+    let humidity: number | undefined;
     const rainTimeline: Array<{ time: string; precipitationMmh: number }> = [];
 
     for (const member of memberArray) {
@@ -143,7 +143,7 @@ export async function fetchVenueWeatherForecast(
       if (param === 'Humidity') humidity = val;
       if (param === 'PrecipitationAmount') {
         const pVal = Math.max(0, val);
-        if (Number.isNaN(rain)) rain = pVal;
+        if (!Number.isFinite(rain)) rain = pVal;
         rainTimeline.push({ time, precipitationMmh: pVal });
       }
     }
@@ -152,9 +152,10 @@ export async function fetchVenueWeatherForecast(
       throw new Error('FMI forecast payload missing valid Temperature or WindSpeed');
     }
 
-    const feelsLike = calculateApparentTemperature(temp, wind, humidity);
-    const turf = evaluateTurfSlickness(temp, rain);
-    const windAdvisoryBadge = getWindAdvisoryBadge(gust);
+    const feelsLike = calculateApparentTemperature(temp, wind, humidity ?? 0);
+    const rainKnown = Number.isFinite(rain);
+    const turf = rainKnown ? evaluateTurfSlickness(temp, rain) : null;
+    const windAdvisoryBadge = Number.isFinite(gust) ? getWindAdvisoryBadge(gust) : undefined;
     const { label: rainOnsetLabel, minutesUntilRain: rainCountdownMinutes } = getRainOnsetLabel(
       kickoffTime,
       rainTimeline
@@ -170,14 +171,15 @@ export async function fetchVenueWeatherForecast(
       temperatureC: Math.round(temp * 10) / 10,
       feelsLikeC: feelsLike,
       windSpeedMs: Math.round(wind * 10) / 10,
-      windGustMs: Number.isFinite(gust) ? Math.round(gust * 10) / 10 : Math.round(wind * 1.5 * 10) / 10,
-      precipitationMmh: Math.round(rain * 10) / 10,
-      rainTimeline: rainTimeline.length > 0 ? rainTimeline : [{ time: kickoffTime, precipitationMmh: rain }],
+      windGustMs: Number.isFinite(gust) ? Math.round(gust * 10) / 10 : null,
+      precipitationMmh: rainKnown ? Math.round(rain * 10) / 10 : null,
+      rainTimeline,
       rainCountdownMinutes,
       rainOnsetLabel,
-      turfCondition: turf.condition,
-      turfConditionLabelFi: turf.labelFi,
+      turfCondition: turf?.condition ?? 'dry',
+      turfConditionLabelFi: turf?.labelFi ?? '—',
       windAdvisoryBadge,
+      available: true,
       isCacheFallback: false,
       uiResourceUri,
     };
