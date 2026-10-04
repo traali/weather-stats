@@ -142,9 +142,10 @@ export function App() {
         <div className="flex items-center gap-3">
           <span
             data-testid="app-version-badge"
-            className="text-xs font-mono text-gray-400 px-2 py-1 rounded bg-white/5 border border-white/10"
+            className="hidden sm:inline text-xs font-mono text-gray-400 px-2 py-1 rounded bg-white/5 border border-white/10"
           >
-            v1.0.0 (git:prod)
+            v{typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '1.0.0'} (git:
+            {typeof __COMMIT_HASH__ !== 'undefined' ? __COMMIT_HASH__ : 'prod'})
           </span>
           <button
             onClick={() => setIsDrawerOpen(true)}
@@ -190,7 +191,7 @@ export function App() {
         {/* Compact Badges in Matchday List Simulation */}
         <section className="flex flex-col gap-3">
           <h2 className="text-sm font-bold uppercase tracking-wider text-gray-400">
-            Kompaktit ottelukorttien säämerkit (MatchdayCard previews)
+            Sää kentällä
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             {Object.entries(DETERMINISTIC_VENUE_SNAPSHOTS).map(([key, snap]) => {
@@ -238,19 +239,28 @@ export function App() {
             <pre className="p-3 rounded-xl bg-black/50 border border-white/5 text-xs text-gray-300 font-mono whitespace-pre-wrap select-all">
               {briefingText}
             </pre>
-            <div className="text-[10px] text-gray-400">
-              *Tarkistettu: 0 syntetisoitua virhetokenia (ei undefined, null, NaN tai [PVM]).
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={handleSimulateLightningWarning}
+                className="min-h-11 px-3 py-1.5 rounded-lg bg-red-950/50 hover:bg-red-900/50 text-red-300 border border-red-500/40 text-xs font-semibold transition-colors"
+              >
+                Simuloi salamatutka (alle 10 km)
+              </button>
+              <button
+                onClick={handleResetLightning}
+                className="min-h-11 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 text-xs font-semibold transition-colors"
+              >
+                Palauta normaali
+              </button>
             </div>
           </div>
 
           {/* WebMCP Status & Tools */}
-          <div className="glass-panel rounded-2xl p-4 flex flex-col gap-3 border border-white/10">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-sky-400">
-                WebMCP Agenttitila
-              </span>
-              <span className="text-[11px] font-mono text-emerald-400">{mcpStatus}</span>
-            </div>
+          <details className="glass-panel rounded-2xl p-4 flex flex-col gap-3 border border-white/10">
+            <summary className="cursor-pointer text-xs font-bold uppercase tracking-wider text-sky-400">
+              WebMCP Agenttitila
+              <span className="ml-2 normal-case tracking-normal font-mono text-emerald-400">{mcpStatus}</span>
+            </summary>
 
             <div className="text-xs text-gray-300">
               Rekisteröidyt työkalut (document, navigator, window):
@@ -268,21 +278,7 @@ export function App() {
               )}
             </ul>
 
-            <div className="pt-2 border-t border-white/10 flex flex-wrap gap-2">
-              <button
-                onClick={handleSimulateLightningWarning}
-                className="px-3 py-1.5 rounded-lg bg-red-950/50 hover:bg-red-900/50 text-red-300 border border-red-500/40 text-xs font-semibold transition-colors"
-              >
-                Simuloi salamatutka (&lt;10 km)
-              </button>
-              <button
-                onClick={handleResetLightning}
-                className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-400 text-xs font-semibold transition-colors"
-              >
-                Palauta normaali
-              </button>
-            </div>
-          </div>
+          </details>
         </section>
       </main>
 
@@ -305,7 +301,7 @@ export function App() {
           rel="noreferrer"
           className="text-sky-400 hover:underline flex items-center gap-1"
         >
-          <span>Avaa erillinen mcp-weather.html widget</span>
+          <span>Sääwidget</span>
           <ExternalLink className="w-3 h-3" />
         </a>
       </footer>
