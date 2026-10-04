@@ -191,13 +191,12 @@ describe('Adversarial Stress Test: Protocol SLA, Fallback Honesty & Resilience',
       });
 
       expect(forecast.isCacheFallback).toBe(true);
+      expect(forecast.available).toBe(false);
       expect(forecast.cacheTimestamp).toBeDefined();
       expect(typeof forecast.cacheTimestamp).toBe('string');
-      expect(forecast.temperatureC).toBe(13.2);
-      expect(forecast.windSpeedMs).toBe(3.8);
-      expect(forecast.precipitationMmh).toBe(0.0);
-      expect(forecast.turfCondition).toBe('dry');
-      expect(forecast.turfConditionLabelFi).toBe('Kuiva');
+      expect(forecast.temperatureC).toBeNull();
+      expect(forecast.windSpeedMs).toBeNull();
+      expect(forecast.precipitationMmh).toBeNull();
 
       const lightning = await fetchPitchLightningRisk({
         lat: 60.1837,
@@ -213,7 +212,7 @@ describe('Adversarial Stress Test: Protocol SLA, Fallback Honesty & Resilience',
       expect(lightning.strikesWithin15kmCount).toBe(0);
       expect(lightning.strikesWithin30kmCount).toBe(0);
       expect(lightning.suspendMatchRecommended).toBe(false);
-      expect(lightning.status).toBe('clear');
+      expect(lightning.status).toBe('unknown');
       expect(lightning.safetyAdvisoryFi).toContain('FMI-yhteys katkennut');
     });
 
@@ -235,9 +234,10 @@ describe('Adversarial Stress Test: Protocol SLA, Fallback Honesty & Resilience',
       });
 
       expect(forecast.isCacheFallback).toBe(true);
+      expect(forecast.available).toBe(false);
       expect(forecast.venueId).toBe('leppavaara');
-      expect(forecast.temperatureC).toBe(13.0);
-      expect(forecast.windGustMs).toBe(8.1);
+      expect(forecast.temperatureC).toBeNull();
+      expect(forecast.windGustMs).toBeNull();
 
       const lightning = await fetchPitchLightningRisk({
         lat: 60.2238,

@@ -62,16 +62,20 @@ describe('WebMCP Tri-Mount Registry & Model Context Standards', () => {
       kickoffTime: '2026-09-12T14:00:00.000Z',
       venueId: 'vaiski',
     })) as {
-      temperatureC: number;
-      feelsLikeC: number;
+      temperatureC: number | null;
+      feelsLikeC: number | null;
+      available?: boolean;
       turfCondition: string;
       uiResourceUri: string;
     };
 
-    expect(typeof result.temperatureC).toBe('number');
-    expect(typeof result.feelsLikeC).toBe('number');
+    expect(result.temperatureC === null || typeof result.temperatureC === 'number').toBe(true);
+    expect(result.feelsLikeC === null || typeof result.feelsLikeC === 'number').toBe(true);
     expect(['dry', 'slick', 'frozen', 'snowy']).toContain(result.turfCondition);
     expect(result.uiResourceUri).toContain('ui://weather/venue-card');
+    if (result.temperatureC === null) {
+      expect(result.available).toBe(false);
+    }
   });
 
   it('executeTool runs get_pitch_lightning_risk and returns 30/30 safety result', async () => {
@@ -87,7 +91,7 @@ describe('WebMCP Tri-Mount Registry & Model Context Standards', () => {
       uiResourceUri: string;
     };
 
-    expect(['clear', 'watch', 'danger']).toContain(result.status);
+    expect(['clear', 'watch', 'danger', 'unknown']).toContain(result.status);
     expect(typeof result.suspendMatchRecommended).toBe('boolean');
     expect(result.uiResourceUri).toContain('ui://weather/lightning-radar');
   });

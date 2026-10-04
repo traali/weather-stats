@@ -24,7 +24,15 @@ export const MatchdayCardWeatherBadge: React.FC<MatchdayCardWeatherBadgeProps> =
     windAdvisoryBadge,
     rainOnsetLabel,
     isCacheFallback,
+    available,
   } = forecast;
+
+  const tempText = available && temperatureC != null ? `${temperatureC.toFixed(1)}°C` : '—';
+  const feelsText = available && feelsLikeC != null ? `(tuntuu ${feelsLikeC.toFixed(1)}°C)` : '';
+  const windText = available && windSpeedMs != null
+    ? `${windSpeedMs.toFixed(1)} m/s${windGustMs != null ? ` (${windGustMs.toFixed(1)})` : ''}`
+    : '—';
+  const rainText = available && precipitationMmh != null ? `${precipitationMmh.toFixed(1)} mm/h` : '—';
 
   // Turf badge color mapping
   const turfColors: Record<string, string> = {
@@ -48,10 +56,10 @@ export const MatchdayCardWeatherBadge: React.FC<MatchdayCardWeatherBadgeProps> =
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-baseline gap-1.5">
           <span className="font-bold text-[var(--nv-text-lg)] text-white tracking-tight">
-            {temperatureC.toFixed(1)}°C
+            {tempText}
           </span>
           <span className="text-[var(--nv-text-xs)] text-gray-400">
-            (tuntuu {feelsLikeC.toFixed(1)}°C)
+            {feelsText}
           </span>
         </div>
 
@@ -59,7 +67,7 @@ export const MatchdayCardWeatherBadge: React.FC<MatchdayCardWeatherBadgeProps> =
         <span
           className={`text-[var(--nv-text-xs)] font-medium px-2 py-0.5 rounded-full border ${turfClass}`}
         >
-          {turfConditionLabelFi}
+          {available ? turfConditionLabelFi : '—'}
         </span>
       </div>
 
@@ -68,14 +76,13 @@ export const MatchdayCardWeatherBadge: React.FC<MatchdayCardWeatherBadgeProps> =
         <div className="flex items-center gap-1">
           <Wind className="w-3.5 h-3.5 text-gray-400" />
           <span>
-            {windSpeedMs.toFixed(1)} m/s
-            {windGustMs ? ` (${windGustMs.toFixed(1)})` : ''}
+            {windText}
           </span>
         </div>
 
         <div className="flex items-center gap-1">
           <CloudRain className="w-3.5 h-3.5 text-sky-400" />
-          <span>{precipitationMmh.toFixed(1)} mm/h</span>
+          <span>{rainText}</span>
         </div>
       </div>
 

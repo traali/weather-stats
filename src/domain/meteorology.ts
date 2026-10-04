@@ -203,11 +203,11 @@ export function getRainOnsetLabel(
 export function formatMatchdayWeatherBriefing(params: {
   venueName: string;
   kickoffTime: string;
-  temperatureC: number;
-  feelsLikeC: number;
-  windSpeedMs: number;
-  windGustMs: number;
-  precipitationMmh: number;
+  temperatureC: number | null;
+  feelsLikeC: number | null;
+  windSpeedMs: number | null;
+  windGustMs: number | null;
+  precipitationMmh: number | null;
   turfConditionLabelFi: string;
   windAdvisory?: string;
   lightningAlert?: string;
@@ -227,12 +227,12 @@ export function formatMatchdayWeatherBriefing(params: {
 
   const safeVenue = venueName || 'Kenttä';
   const safeTime = kickoffTime ? kickoffTime.slice(11, 16) : '00:00';
-  const safeTemp = Number.isFinite(temperatureC) ? temperatureC.toFixed(1) : '0.0';
-  const safeFeels = Number.isFinite(feelsLikeC) ? feelsLikeC.toFixed(1) : safeTemp;
-  const safeWind = Number.isFinite(windSpeedMs) ? windSpeedMs.toFixed(1) : '0.0';
-  const safeGust = Number.isFinite(windGustMs) ? ` (puuska ${windGustMs.toFixed(1)} m/s)` : '';
-  const safePrecip = Number.isFinite(precipitationMmh) ? precipitationMmh.toFixed(1) : '0.0';
-  const safeTurf = turfConditionLabelFi || 'Kuiva';
+  const safeTemp = temperatureC != null && Number.isFinite(temperatureC) ? temperatureC.toFixed(1) : '–';
+  const safeFeels = feelsLikeC != null && Number.isFinite(feelsLikeC) ? feelsLikeC.toFixed(1) : '–';
+  const safeWind = windSpeedMs != null && Number.isFinite(windSpeedMs) ? windSpeedMs.toFixed(1) : '–';
+  const safeGust = windGustMs != null && Number.isFinite(windGustMs) ? ` (puuska ${windGustMs.toFixed(1)} m/s)` : '';
+  const safePrecip = precipitationMmh != null && Number.isFinite(precipitationMmh) ? precipitationMmh.toFixed(1) : '–';
+  const safeTurf = turfConditionLabelFi || '–';
 
   const lines: string[] = [
     `🌦️ SÄÄTIEDOTE — ${safeVenue} klo ${safeTime}`,

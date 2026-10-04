@@ -151,7 +151,7 @@ export const SatelliteEmbedDrawer: React.FC<SatelliteEmbedDrawerProps> = ({
             venueCoords={venueCoords}
             venueName={venueName}
             strikes={lightningRisk?.strikes || []}
-            status={lightningRisk?.status || 'clear'}
+            status={lightningRisk?.status ?? 'unknown'}
             radiusKm={25}
           />
         </div>

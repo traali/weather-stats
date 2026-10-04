@@ -3,7 +3,6 @@ import { formatMatchdayWeatherBriefing } from '../src/domain/meteorology';
 import {
   getDeterministicForecastFallback,
   getDeterministicLightningFallback,
-  DETERMINISTIC_VENUE_SNAPSHOTS,
 } from '../src/services/weatherCache';
 
 describe('Domain Safety Invariants & Anti-Slop Token Gates', () => {
@@ -53,7 +52,8 @@ describe('Domain Safety Invariants & Anti-Slop Token Gates', () => {
       expect(brief).not.toContain('NaN');
       expect(brief).not.toContain('[object Object]');
       expect(brief).not.toContain('[PVM]');
-      expect(brief).toContain('0.0°C');
+      expect(brief).toContain('–°C');
+      expect(brief).not.toContain('0.0°C');
     });
   });
 
@@ -69,7 +69,9 @@ describe('Domain Safety Invariants & Anti-Slop Token Gates', () => {
 
       expect(fallback.isCacheFallback).toBe(true);
       expect(fallback.cacheTimestamp).toBeDefined();
-      expect(fallback.temperatureC).toBe(DETERMINISTIC_VENUE_SNAPSHOTS.vaiski.temperatureC);
+      expect(fallback.available).toBe(false);
+      expect(fallback.temperatureC).toBeNull();
+      expect(fallback.windSpeedMs).toBeNull();
     });
 
     it('never invents synthetic lightning strikes in offline fallback', () => {
@@ -79,7 +81,8 @@ describe('Domain Safety Invariants & Anti-Slop Token Gates', () => {
       expect(lightningFallback.isCacheFallback).toBe(true);
       expect(lightningFallback.strikes.length).toBe(0);
       expect(lightningFallback.strikesWithin10kmCount).toBe(0);
-      expect(lightningFallback.status).toBe('clear');
+      expect(lightningFallback.status).toBe('unknown');
+      expect(lightningFallback.safetyAdvisoryFi).toContain('FMI-yhteys katkennut');
     });
   });
 });
