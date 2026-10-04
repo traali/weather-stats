@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { registerWeatherWebMCP } from '../src/mcp-app';
+import { isNativeModelContext, registerWeatherWebMCP } from '../src/mcp-app';
 import { setupMockDom } from './setupDom';
 
 describe('WebMCP Tri-Mount Registry & Model Context Standards', () => {
@@ -7,6 +7,26 @@ describe('WebMCP Tri-Mount Registry & Model Context Standards', () => {
     setupMockDom();
   });
 
+
+  it('does not replace a host that already has registerTool', () => {
+    const names: string[] = [];
+    const host = {
+      registerTool(tool: { name: string }) {
+        names.push(tool.name);
+      },
+    };
+    (document as unknown as { modelContext?: unknown }).modelContext = host;
+    const registry = registerWeatherWebMCP();
+    expect(isNativeModelContext(host)).toBe(true);
+    expect(registry).toBeUndefined();
+    expect((document as unknown as { modelContext?: unknown }).modelContext).toBe(host);
+    expect(navigator.modelContext).toBeUndefined();
+    expect(names).toEqual([
+      'get_venue_weather_forecast',
+      'get_pitch_lightning_risk',
+      'get_radar_satellite_layer',
+    ]);
+  });
 
   it('tri-mounts ModelContextRegistry on document, navigator, and window', () => {
     const registry = registerWeatherWebMCP();

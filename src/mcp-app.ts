@@ -102,6 +102,13 @@ declare global {
 
 let _weatherMessageHandler: ((event: MessageEvent) => void) | null = null;
 
+/** Chrome and ChatGPT expose registerTool and do not implement callTool. */
+export function isNativeModelContext(value: unknown): boolean {
+  if (!value || typeof value !== 'object') return false;
+  const host = value as { registerTool?: unknown; callTool?: unknown };
+  return typeof host.registerTool === 'function' && typeof host.callTool !== 'function';
+}
+
 export function registerWeatherWebMCP(): ModelContextRegistry | undefined {
   if (typeof window === 'undefined') return undefined;
 
@@ -182,8 +189,13 @@ export function registerWeatherWebMCP(): ModelContextRegistry | undefined {
     },
   };
 
-  // 1. Tri-mount registry
-  if (typeof document !== 'undefined') {
+  // Mount only when the page has no host. Replacing document.modelContext hides the tools from ChatGPT.
+  const existingDoc = typeof document !== 'undefined'
+    ? (document as { modelContext?: unknown }).modelContext
+    : undefined;
+  const keepHost = isNativeModelContext(existingDoc);
+
+  if (typeof document !== 'undefined' && !keepHost) {
     try {
       Object.defineProperty(document, 'modelContext', {
         value: registry,
@@ -195,7 +207,7 @@ export function registerWeatherWebMCP(): ModelContextRegistry | undefined {
       (document as unknown as { modelContext?: ModelContextRegistry }).modelContext = registry;
     }
   }
-  if (typeof navigator !== 'undefined') {
+  if (typeof navigator !== 'undefined' && !keepHost) {
     try {
       Object.defineProperty(navigator, 'modelContext', {
         value: registry,
@@ -207,7 +219,7 @@ export function registerWeatherWebMCP(): ModelContextRegistry | undefined {
       (navigator as unknown as { modelContext?: ModelContextRegistry }).modelContext = registry;
     }
   }
-  if (typeof window !== 'undefined') {
+  if (typeof window !== 'undefined' && !keepHost) {
     (window as unknown as { modelContext?: ModelContextRegistry }).modelContext = registry;
   }
 
@@ -415,6 +427,18 @@ export function registerWeatherWebMCP(): ModelContextRegistry | undefined {
       detail: { location: 'navigator.modelContext & document.modelContext & window.modelContext' },
     })
   );
+
+  if (keepHost) {
+    const host = existingDoc as { registerTool: (tool: ModelContextTool) => unknown };
+    for (const tool of registry.getTools()) {
+      try {
+        host.registerTool(tool);
+      } catch {
+        /* the host already has this name */
+      }
+    }
+    return undefined;
+  }
 
   return registry;
 }
