@@ -60,6 +60,7 @@ export function evaluatePitchLightningRisk(
   for (const strike of rawStrikes) {
     const distKm = haversineDistanceKm(venueCoords.lat, venueCoords.lng, strike.lat, strike.lng);
     const strikeTimeMs = new Date(strike.timeIso).getTime();
+    if (!Number.isFinite(strikeTimeMs) || !Number.isFinite(distKm)) continue;
 
     // Clamp negative elapsed time (clock skew guard per M-13 invariant)
     const elapsedMinutes = Math.max(0, Math.round((referenceTimeMs - strikeTimeMs) / 60000));
@@ -171,8 +172,8 @@ export function evaluatePitchLightningRisk(
     status: 'clear',
     nearestStrikeKm: nearestStrikeKm !== undefined ? Math.round(nearestStrikeKm * 10) / 10 : undefined,
     nearestStrikeMinutesAgo,
-    strikesWithin10kmCount: 0,
-    strikesWithin15kmCount: 0,
+    strikesWithin10kmCount,
+    strikesWithin15kmCount,
     strikesWithin30kmCount,
     suspendMatchRecommended: false,
     downpourWarning: false,
