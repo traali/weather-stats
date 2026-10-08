@@ -24,7 +24,7 @@ The canonical, tool-agnostic rule for all AI agents and contributors working in 
 | Strict TypeScript (zero `any`) | Ad-hoc `any` casting, unvalidated external payloads |
 | React 19 + Tailwind CSS v4 + Framer Motion | Legacy CSS, un-animated jarring layout shifts |
 | Nova Design Tokens & Liquid Glassmorphism | Hardcoded random hex colors, broken clamp typography |
-| FMI WFS/WMS open data + deterministic cache fallback | Mocking fake weather or fabricating synthetic lightning strikes |
+| FMI WFS/WMS open data; on failure an explicit "ei saatu" result | Reusing an old reading as current, mocking weather, fabricating lightning strikes |
 | Finnish 30/30 Lightning Rule (10 km danger / 20 km watch) | Ignoring player safety or returning unverified clear states |
 | WebMCP Tri-Mount Registry + 500 ms SLA postMessage bridge | Breaking standard tool envelopes or exceeding response timeouts |
 | Zero template token leaks (`[object Object]`, `[PVM]`, `NaN`, `undefined`) | Emitting unparsed template tokens in UI or WhatsApp briefings |
@@ -43,7 +43,7 @@ The canonical, tool-agnostic rule for all AI agents and contributors working in 
 ---
 
 ## §4 Security & Meteorological Integrity
-- **Zero Mock Fallback:** When FMI API times out or network drops, retrieve cached observations with `isCacheFallback: true`. NEVER fabricate fake lightning strikes or synthetic rain probabilities.
+- **Zero Mock, Zero Stale:** When FMI times out, errors, or answers with something that is not a FeatureCollection, return `available: false` (forecast/observation) or lightning `status: 'unknown'` ("Salamatietoa ei saatu"). Never serve a remembered reading as current, never show a failed lightning check as clear, never show a missing (`NaN`) value as 0.
 - **Zero Secrets:** Never commit credentials, tokens, or environment keys.
 - **Defensive API Ingestion:** Validate and sanitize all external XML/GML/JSON payloads before rendering.
 - **Rate-Limiting & Timeouts:** All remote API calls must use `AbortController` (5000 ms ceiling).

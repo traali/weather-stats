@@ -23,14 +23,13 @@ export const MatchdayCardWeatherBadge: React.FC<MatchdayCardWeatherBadgeProps> =
     turfConditionLabelFi,
     windAdvisoryBadge,
     rainOnsetLabel,
-    isCacheFallback,
     available,
   } = forecast;
 
-  const tempText = available && temperatureC != null ? `${temperatureC.toFixed(1)}°C` : '—';
+  const tempText = available && temperatureC != null && Number.isFinite(temperatureC) ? `${temperatureC.toFixed(1)}°C` : '—';
   const feelsText = available && feelsLikeC != null ? `(tuntuu ${feelsLikeC.toFixed(1)}°C)` : '';
   const windText = available && windSpeedMs != null
-    ? `${windSpeedMs.toFixed(1)} m/s${windGustMs != null ? ` (${windGustMs.toFixed(1)})` : ''}`
+    ? `${windSpeedMs.toFixed(1)} m/s${windGustMs != null && Number.isFinite(windGustMs) ? ` (puuska ${windGustMs.toFixed(1)})` : ''}`
     : '—';
   const rainText = available && precipitationMmh != null ? `${precipitationMmh.toFixed(1)} mm/h` : '—';
 
@@ -87,7 +86,7 @@ export const MatchdayCardWeatherBadge: React.FC<MatchdayCardWeatherBadgeProps> =
       </div>
 
       {/* Dynamic Advisories (Rain Onset Countdown or Wind Gust Warning) */}
-      {(rainOnsetLabel || windAdvisoryBadge || isCacheFallback) && (
+      {(rainOnsetLabel || windAdvisoryBadge) && (
         <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-white/5 text-[var(--nv-text-xs)]">
           {rainOnsetLabel && (
             <span className="text-sky-300 font-medium">{rainOnsetLabel}</span>
@@ -97,12 +96,6 @@ export const MatchdayCardWeatherBadge: React.FC<MatchdayCardWeatherBadgeProps> =
             <span className="text-amber-300 font-medium flex items-center gap-1">
               <AlertTriangle className="w-3 h-3 text-amber-400" />
               {windAdvisoryBadge}
-            </span>
-          )}
-
-          {isCacheFallback && (
-            <span className="text-[10px] text-amber-400/80 bg-amber-950/30 px-1.5 py-0.5 rounded border border-amber-500/20">
-              Välimuisti
             </span>
           )}
         </div>

@@ -7,7 +7,7 @@ UI catalog: `docs/UI_COMPONENTS.md` (2026-09-26). Five components. Never invent 
 
 ## Architecture & Key Decisions
 - **Strict Monastic Sovereignty**: Standalone React 19 + TypeScript + TailwindCSS v4 application with independent quality gates (`npm run check` = `tsc --noEmit` + `eslint` + `vitest`).
-- **Zero Mock Fallback**: In accordance with youth athlete safety invariants, the system never fabricates synthetic weather or fake lightning strikes. Offline or degraded network scenarios resolve to deterministic cached observations flagged with `isCacheFallback: true`.
+- **Zero Mock Fallback**: In accordance with youth athlete safety invariants, the system never fabricates synthetic weather or fake lightning strikes. When FMI fails, the result is explicit: forecast/observation `available: false`, lightning `status: 'unknown'` ("Salamatietoa ei saatu"). No cached reading is ever shown as current.
 - **WebMCP Tri-Mounting**: Exposes `get_venue_weather_forecast`, `get_pitch_lightning_risk`, and `get_radar_satellite_layer` on `document.modelContext`, `navigator.modelContext`, and `window.modelContext`.
 - **Cross-Frame postMessage Bridge**: Enables seamless, secure cross-origin embedding inside Pelipäivä and sovereign sports centers with guaranteed resolution within a 500 ms SLA.
 - **Nova Design System**: Utilizes semantic tokens, liquid glassmorphism, responsive `clamp()` fluid typography, and tactile spring motion.
@@ -23,4 +23,4 @@ UI catalog: `docs/UI_COMPONENTS.md` (2026-09-26). Five components. Never invent 
 ## Contribution & Verification Guide
 - Always run `npm run check` before submitting changes.
 - Ensure all meteorological formulas have corresponding invariant tests.
-- Prohibit unrendered template placeholders (`[object Object]`, `[PVM]`, `undefined`, `null`, `NaN`).
+- Prohibit unrendered template placeholders and empty-value words printed as text.

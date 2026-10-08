@@ -15,7 +15,9 @@ Finnish outdoor youth sports are heavily impacted by rapid weather shifts, freez
   - Summer heat index (Rothfusz polynomial & Summer Simmer Index).
   - Dynamic turf slickness state machine (`frozen`, `slick`, `dry`).
   - Finnish 30/30 lightning safety engine with Haversine distance, 10 km danger / 20 km watch thresholds, and fresh strike pulsing indicator math.
-  - Zero-mock fallback: on network disconnection or FMI timeout, returns deterministic cached venue observations flagged with `isCacheFallback: true`; never fabricates synthetic weather.
+  - Zero-mock, zero-stale: on network failure, FMI timeout or an FMI error page, the app says the data was not received ("ei saatu"). No cached reading is shown as current, a failed lightning check is never "clear", and FMI `NaN` values are shown as "—".
+  - Current observation from the nearest FMI station (`fmi::observations::weather::timevaluepair`, bbox 25 km, freshness 40 min) with station name, distance and FMI observation time in Europe/Helsinki.
+  - Kickoff forecast from Harmonie (`Temperature`, `WindSpeedMS`, `WindGust`, `Humidity`, `Precipitation1h`) at the time step nearest kickoff. Shareable link: `?paikka=lauttasaari&klo=18:00`.
 - **WebMCP Tri-Mount Registry**: Registers `get_venue_weather_forecast`, `get_pitch_lightning_risk`, and `get_radar_satellite_layer` on `document.modelContext`, `navigator.modelContext`, and `window.modelContext`.
 - **Cross-Frame Bridge**: Bi-directional `postMessage` protocol resolving `webmcp:request` within 500 ms SLA.
 

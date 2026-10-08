@@ -1,17 +1,11 @@
 /**
- * Deterministic Weather Cache & Invariant Fallback Store
+ * Venue list and "FMI did not answer" results.
  *
- * Implements strict Zero-Mock Fallback:
- * - On FMI network failure or timeout, provides verified historical/cached snapshots
- *   explicitly flagged with `isCacheFallback: true`.
- * - NEVER fabricates synthetic random weather or fake lightning strikes.
+ * There is deliberately no weather cache here. An old temperature or an old
+ * lightning check is never shown as current: when FMI fails, the result says so.
  */
 
-import {
-  Coordinates,
-  VenueWeatherForecastResult,
-  PitchLightningRiskResult,
-} from '../types/weather';
+import { Coordinates, VenueWeatherForecastResult } from '../types/weather';
 
 export interface CachedVenueSnapshot {
   venueId: string;
@@ -20,13 +14,19 @@ export interface CachedVenueSnapshot {
 }
 
 /**
- * Real Helsinki-region halls. Coordinates only — weather is never stored here.
+ * Real Helsinki-region venues. Coordinates only — weather is never stored here.
+ * Töölö and Lauttasaari coordinates checked against OpenStreetMap (2026-10-08).
  */
 export const DETERMINISTIC_VENUE_SNAPSHOTS: Record<string, CachedVenueSnapshot> = {
   vaiski: {
     venueId: 'vaiski',
     venueName: 'Töölön Pallokenttä (Väiski)',
-    coords: { lat: 60.1873, lng: 24.9258 },
+    coords: { lat: 60.1872, lng: 24.9232 },
+  },
+  lauttasaari: {
+    venueId: 'lauttasaari',
+    venueName: 'Lauttasaaren liikuntapuisto, Helsinki',
+    coords: { lat: 60.1633, lng: 24.8662 },
   },
   otahalli: {
     venueId: 'otahalli',
@@ -46,7 +46,7 @@ export const DETERMINISTIC_VENUE_SNAPSHOTS: Record<string, CachedVenueSnapshot> 
   kisahalli: {
     venueId: 'kisahalli',
     venueName: 'Töölön Kisahalli, Helsinki',
-    coords: { lat: 60.1852, lng: 24.9261 },
+    coords: { lat: 60.1834, lng: 24.9257 },
   },
   tapiola: {
     venueId: 'tapiola',
@@ -55,45 +55,16 @@ export const DETERMINISTIC_VENUE_SNAPSHOTS: Record<string, CachedVenueSnapshot> 
   },
 };
 
-const memoryForecastCache = new Map<string, VenueWeatherForecastResult>();
-const memoryLightningCache = new Map<string, PitchLightningRiskResult>();
+/** Venues in display order. */
+export const VENUES = DETERMINISTIC_VENUE_SNAPSHOTS;
 
-/**
- * Clears all in-memory weather and lightning forecast caches.
- * Ensures isolation between test cases and avoids cross-query state contamination.
- */
-export function clearWeatherCache(): void {
-  memoryForecastCache.clear();
-  memoryLightningCache.clear();
-}
-
-/**
- * Generates coordinate hash key with 4 decimal places (~11m spatial resolution).
- * Distinguishes adjacent urban sports venues (e.g. Väiski and Kisahalli ~230m apart)
- * while tolerating minor floating-point coordinate representations.
- */
-function coordKey(lat: number, lng: number): string {
-  return `${lat.toFixed(4)},${lng.toFixed(4)}`;
-}
-
-export function saveForecastToCache(result: VenueWeatherForecastResult): void {
-  const key = coordKey(result.coordinates.lat, result.coordinates.lng);
-  memoryForecastCache.set(key, result);
-  if (result.venueId) {
-    memoryForecastCache.set(result.venueId.toLowerCase(), result);
-  }
-}
-
-export function saveLightningToCache(coords: Coordinates, result: PitchLightningRiskResult): void {
-  const key = coordKey(coords.lat, coords.lng);
-  memoryLightningCache.set(key, result);
-}
-
+/** Forecast result for "FMI did not answer". Every value is null; nothing is remembered. */
 export function unavailableForecast(
   coords: Coordinates,
   kickoffTimeIso: string,
   venueId?: string,
-  venueName?: string
+  venueName?: string,
+  errorFi: string = 'FMI ei vastannut.'
 ): VenueWeatherForecastResult {
   return {
     venueId,
@@ -109,72 +80,9 @@ export function unavailableForecast(
     turfCondition: 'dry',
     turfConditionLabelFi: '—',
     available: false,
-    isCacheFallback: true,
-    cacheTimestamp: new Date().toISOString(),
+    isCacheFallback: false,
+    fetchedAt: new Date().toISOString(),
+    errorFi,
     uiResourceUri: `ui://weather/venue-card?venueId=${venueId || 'venue'}&lat=${coords.lat}&lng=${coords.lng}&unavailable=1`,
   };
 }
-
-/**
- * Returns the last real FMI reading for this venue, or an explicit unavailable result.
- * Never copies a hardcoded temperature.
- */
-export function getDeterministicForecastFallback(
-  coords: Coordinates,
-  kickoffTimeIso: string,
-  venueId?: string,
-  venueName?: string
-): VenueWeatherForecastResult {
-  const venueHit = venueId ? memoryForecastCache.get(venueId.toLowerCase()) : undefined;
-  const coordHit = memoryForecastCache.get(coordKey(coords.lat, coords.lng));
-  const memoryHit = venueHit || coordHit;
-
-  if (memoryHit && memoryHit.available && memoryHit.temperatureC != null) {
-    return {
-      ...memoryHit,
-      isCacheFallback: true,
-      cacheTimestamp: memoryHit.cacheTimestamp || new Date().toISOString(),
-    };
-  }
-
-  return unavailableForecast(coords, kickoffTimeIso, venueId, venueName);
-}
-
-/**
- * Retrieves cached lightning risk or deterministic fallback
- * INVARIANT: NEVER fabricates fake strikes during offline mode.
- */
-export function getDeterministicLightningFallback(
-  coords: Coordinates,
-  venueName?: string
-): PitchLightningRiskResult {
-  const key = coordKey(coords.lat, coords.lng);
-  const memoryHit = memoryLightningCache.get(key);
-
-  if (memoryHit) {
-    return {
-      ...memoryHit,
-      isCacheFallback: true,
-      cacheTimestamp: memoryHit.cacheTimestamp || new Date().toISOString(),
-    };
-  }
-
-  const safeVenue = venueName ? `kohteessa ${venueName}` : 'välimuistissa';
-
-  return {
-    status: 'unknown',
-    nearestStrikeKm: undefined,
-    nearestStrikeMinutesAgo: undefined,
-    strikesWithin10kmCount: 0,
-    strikesWithin15kmCount: 0,
-    strikesWithin30kmCount: 0,
-    suspendMatchRecommended: false,
-    downpourWarning: false,
-    safetyAdvisoryFi: `Salamatilaa ei saatu (${safeVenue}). FMI-yhteys katkennut. Älä oleta, että sää on turvallinen.`,
-    strikes: [],
-    isCacheFallback: true,
-    cacheTimestamp: new Date().toISOString(),
-    uiResourceUri: `ui://weather/lightning-radar?lat=${coords.lat}&lng=${coords.lng}&status=clear&cache=true`,
-  };
-}
-

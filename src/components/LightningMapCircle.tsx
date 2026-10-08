@@ -33,13 +33,17 @@ export const LightningMapCircle: React.FC<LightningMapCircleProps> = ({
                 ? 'bg-red-500 animate-ping'
                 : status === 'watch'
                 ? 'bg-amber-400'
-                : 'bg-emerald-400'
+                : status === 'clear'
+                ? 'bg-emerald-400'
+                : 'bg-zinc-500'
             }`}
           />
           Salamatutka (30/30)
         </span>
         <span className="text-gray-400 font-mono">
-          {strikes.length} isku{strikes.length === 1 ? '' : 'a'} ({radiusKm} km)
+          {status === 'unknown'
+            ? 'Salamatietoa ei saatu'
+            : `${strikes.length} isku${strikes.length === 1 ? '' : 'a'} (${radiusKm} km)`}
         </span>
       </div>
 

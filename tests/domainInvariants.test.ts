@@ -1,9 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { formatMatchdayWeatherBriefing } from '../src/domain/meteorology';
-import {
-  getDeterministicForecastFallback,
-  getDeterministicLightningFallback,
-} from '../src/services/weatherCache';
+import { unavailableForecast } from '../src/services/weatherCache';
+import { unknownLightningRisk } from '../src/domain/lightningSafety';
 
 describe('Domain Safety Invariants & Anti-Slop Token Gates', () => {
   describe('Zero-Token-Leak WhatsApp Briefing Formatter (MATH-10)', () => {
@@ -57,32 +55,46 @@ describe('Domain Safety Invariants & Anti-Slop Token Gates', () => {
     });
   });
 
-  describe('Cache Fallback Honesty & Zero-Mock Invariant', () => {
-    it('sets isCacheFallback: true on all fallback snapshots', () => {
+  describe('FMI failure stays a failure (no remembered values)', () => {
+    it('unavailable forecast has only nulls and says why', () => {
       const coords = { lat: 60.1873, lng: 24.9258 };
-      const fallback = getDeterministicForecastFallback(
-        coords,
-        '2026-09-12T14:00:00.000Z',
-        'vaiski',
-        'Väiski'
-      );
+      const fallback = unavailableForecast(coords, '2026-09-12T14:00:00.000Z', 'vaiski', 'Väiski');
 
-      expect(fallback.isCacheFallback).toBe(true);
-      expect(fallback.cacheTimestamp).toBeDefined();
+      expect(fallback.isCacheFallback).toBe(false);
       expect(fallback.available).toBe(false);
       expect(fallback.temperatureC).toBeNull();
       expect(fallback.windSpeedMs).toBeNull();
+      expect(fallback.windGustMs).toBeNull();
+      expect(fallback.precipitationMmh).toBeNull();
+      expect(fallback.errorFi).toBe('FMI ei vastannut.');
     });
 
-    it('never invents synthetic lightning strikes in offline fallback', () => {
+    it('failed lightning check is unknown, never clear, never invented strikes', () => {
       const coords = { lat: 60.1873, lng: 24.9258 };
-      const lightningFallback = getDeterministicLightningFallback(coords, 'Väiski');
+      const lightningFallback = unknownLightningRisk(coords, 'Väiski');
 
-      expect(lightningFallback.isCacheFallback).toBe(true);
-      expect(lightningFallback.strikes.length).toBe(0);
-      expect(lightningFallback.strikesWithin10kmCount).toBe(0);
       expect(lightningFallback.status).toBe('unknown');
-      expect(lightningFallback.safetyAdvisoryFi).toContain('FMI-yhteys katkennut');
+      expect(lightningFallback.strikes.length).toBe(0);
+      expect(lightningFallback.safetyAdvisoryFi).toContain('Salamatietoa ei saatu');
+      expect(lightningFallback.safetyAdvisoryFi).not.toMatch(/turvalli/i);
+      expect(lightningFallback.uiResourceUri).toContain('status=unknown');
+    });
+  });
+
+  describe('Briefing uses Helsinki time', () => {
+    it('shows 18.00 for a 15:00Z kickoff in October (EEST)', () => {
+      const brief = formatMatchdayWeatherBriefing({
+        venueName: 'Väiski',
+        kickoffTime: '2026-10-08T15:00:00.000Z',
+        temperatureC: 10,
+        feelsLikeC: 8,
+        windSpeedMs: 3,
+        windGustMs: null,
+        precipitationMmh: 0,
+        turfConditionLabelFi: 'Kuiva',
+      });
+      expect(brief).toContain('klo 18.00');
+      expect(brief).not.toContain('15:00');
     });
   });
 });

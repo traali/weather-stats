@@ -49,10 +49,11 @@ describe('Meteorological Domain Invariants', () => {
       expect(calculateFmiFeelsLike(18.5, 0.0)).toBe(18.5);
     });
 
-    it('accurately evaluates cold windy conditions (-10°C at 10 m/s = -24.9°C)', () => {
-      // 15 + (22/37)*(-10) + (15/37)*(37)^0.16*(-47) = -24.90
+    it('uses wind in m/s like FMI (-10°C at 10 m/s = -18.9°C)', () => {
+      // 15 + (22/37)*(-10) + (15/37)*(10+1)^0.16*(-47) = -18.91 (FmiFeelsLikeTemperature)
+      // The old km/h input gave -24.9°C, colder than even JAG/TI (-20.3°C).
       const feels = calculateFmiFeelsLike(-10.0, 10.0);
-      expect(feels).toBe(-24.9);
+      expect(feels).toBe(-18.9);
     });
 
 
@@ -89,8 +90,12 @@ describe('Meteorological Domain Invariants', () => {
       expect(apparent).toBeGreaterThan(28.0);
     });
 
-    it('returns air temperature in mild neutral conditions', () => {
-      expect(calculateApparentTemperature(15.0, 1.0, 50)).toBe(15.0);
+    it('applies the light-wind chill at 15°C, 1 m/s, 50 % (FMI: 14.0°C)', () => {
+      expect(calculateApparentTemperature(15.0, 1.0, 50)).toBe(14.0);
+    });
+
+    it('equals air temperature at calm wind below the simmer limit', () => {
+      expect(calculateApparentTemperature(10.0, 0, 70)).toBe(10.0);
     });
   });
 

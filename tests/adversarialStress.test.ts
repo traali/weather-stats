@@ -38,9 +38,9 @@ describe('⚡ Empirical Challenger Adversarial Stress Test Suite', () => {
       const jagti20 = calculateJagtiWindChill(-35.0, 20.0);
       const jagti30 = calculateJagtiWindChill(-35.0, 30.0);
 
-      // FMI feels-like values: -63.8°C at 20 m/s, -67.6°C at 30 m/s
-      expect(fmi20).toBe(-63.8);
-      expect(fmi30).toBe(-67.6);
+      // FMI feels-like (wind in m/s, as in FMI's NFmiMetMath.cpp): -53.3°C at 20 m/s, -56.4°C at 30 m/s
+      expect(fmi20).toBe(-53.3);
+      expect(fmi30).toBe(-56.4);
       expect(fmi30).toBeLessThan(fmi20); // strictly monotonic
 
       // JAG/TI wind chill: -58.7°C at 20 m/s, -62.0°C at 30 m/s
@@ -56,13 +56,17 @@ describe('⚡ Empirical Challenger Adversarial Stress Test Suite', () => {
       expect(siple35).toBeGreaterThanOrEqual(siple25);
     });
 
-    it('detects step discontinuity in calculateApparentTemperature at 1.33 m/s threshold', () => {
-      // In calculateApparentTemperature: windSpeedMs > 1.33 threshold creates step jump
-      const app1_33 = calculateApparentTemperature(5.0, 1.33); // 5.0°C (raw air temp)
-      const app1_34 = calculateApparentTemperature(5.0, 1.34); // ~0.8°C (FMI feels-like)
-      expect(app1_33).toBe(5.0);
-      expect(app1_34).toBeLessThan(1.0);
-      expect(app1_33 - app1_34).toBeGreaterThan(4.0); // 4.2°C jump across 0.01 m/s!
+    it('has no step jump in calculateApparentTemperature around 1.33 m/s (old threshold)', () => {
+      const app1_33 = calculateApparentTemperature(5.0, 1.33, 80);
+      const app1_34 = calculateApparentTemperature(5.0, 1.34, 80);
+      expect(app1_33).not.toBeNull();
+      expect(app1_34).not.toBeNull();
+      expect(Math.abs((app1_33 as number) - (app1_34 as number))).toBeLessThan(0.1);
+    });
+
+    it('returns null, not a number, when humidity is missing', () => {
+      expect(calculateApparentTemperature(5.0, 3.0, null)).toBeNull();
+      expect(calculateApparentTemperature(NaN, 3.0, 80)).toBeNull();
     });
   });
 
@@ -75,9 +79,10 @@ describe('⚡ Empirical Challenger Adversarial Stress Test Suite', () => {
       const ssi = calculateSummerSimmerIndex(35.0, 90);
 
       expect(hi).toBeCloseTo(63.7, 1);
-      expect(ssi).toBeCloseTo(52.9, 1);
+      // FMI's own SSI (FmiSummerSimmerIndex, rh_ref 50 %)
+      expect(ssi).toBeCloseTo(41.2, 1);
       expect(hi).toBeGreaterThan(50.0);
-      expect(ssi).toBeGreaterThan(45.0);
+      expect(ssi).toBeGreaterThan(35.0);
     });
 
     it('verifies boundary behavior of Rothfusz heat index at 20.0°C and 40% RH', () => {

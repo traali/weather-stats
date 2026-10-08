@@ -65,6 +65,7 @@ export const SatelliteEmbedDrawer: React.FC<SatelliteEmbedDrawerProps> = ({
 
   const isDanger = lightningRisk?.status === 'danger';
   const isWatch = lightningRisk?.status === 'watch';
+  const isUnknown = !lightningRisk || lightningRisk.status === 'unknown';
 
   return (
     <div
@@ -108,7 +109,7 @@ export const SatelliteEmbedDrawer: React.FC<SatelliteEmbedDrawerProps> = ({
               </div>
               {lightningRisk?.resumeCountdownMinutes && (
                 <div className="text-xs font-semibold mt-1 text-red-300">
-                  Turvallinen paluu arviolta {lightningRisk.resumeCountdownMinutes} min kuluttua.
+                  Peliä voi jatkaa aikaisintaan {lightningRisk.resumeCountdownMinutes} min kuluttua, jos uusia salamoita ei havaita.
                 </div>
               )}
             </div>
@@ -121,6 +122,15 @@ export const SatelliteEmbedDrawer: React.FC<SatelliteEmbedDrawerProps> = ({
             <div className="text-xs">
               <span className="font-bold">Ukkosvahti (&lt;20 km): </span>
               {lightningRisk?.alertMessage || 'Ukkosrintama lähestyy. Tarkkaile taivasta.'}
+            </div>
+          </div>
+        )}
+
+        {isUnknown && (
+          <div className="mb-4 p-3 rounded-xl bg-zinc-900 border border-amber-500/50 text-amber-200 flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+            <div className="text-xs">
+              {lightningRisk?.safetyAdvisoryFi || 'Salamatietoa ei saatu. Älä oleta, että ukkosta ei ole.'}
             </div>
           </div>
         )}
@@ -145,7 +155,7 @@ export const SatelliteEmbedDrawer: React.FC<SatelliteEmbedDrawerProps> = ({
         <div className="mb-6">
           <h3 className="text-sm font-semibold text-gray-300 mb-2 flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-red-500" />
-            Salamaturvallisuuden etäisyyskehä (10 / 20 km)
+            Salamaetäisyydet (10 / 20 km)
           </h3>
           <LightningMapCircle
             venueCoords={venueCoords}

@@ -179,7 +179,7 @@ describe('Adversarial Stress Test: Protocol SLA, Fallback Honesty & Resilience',
   });
 
   describe('2. Zero-Mock Fallback Honesty on FMI Network Failure & Timeout', () => {
-    it('returns deterministic cache fallback with isCacheFallback: true on network connection failure', async () => {
+    it('returns explicit unavailable / unknown on network connection failure', async () => {
       vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('TypeError: Failed to fetch (offline)')));
 
       const forecast = await fetchVenueWeatherForecast({
@@ -190,10 +190,9 @@ describe('Adversarial Stress Test: Protocol SLA, Fallback Honesty & Resilience',
         venueName: 'Otahalli & Otaranta, Espoo',
       });
 
-      expect(forecast.isCacheFallback).toBe(true);
+      expect(forecast.isCacheFallback).toBe(false);
       expect(forecast.available).toBe(false);
-      expect(forecast.cacheTimestamp).toBeDefined();
-      expect(typeof forecast.cacheTimestamp).toBe('string');
+      expect(forecast.errorFi).toBe('FMI ei vastannut.');
       expect(forecast.temperatureC).toBeNull();
       expect(forecast.windSpeedMs).toBeNull();
       expect(forecast.precipitationMmh).toBeNull();
@@ -205,18 +204,18 @@ describe('Adversarial Stress Test: Protocol SLA, Fallback Honesty & Resilience',
         venueName: 'Otahalli',
       });
 
-      expect(lightning.isCacheFallback).toBe(true);
-      expect(lightning.cacheTimestamp).toBeDefined();
+      expect(lightning.isCacheFallback).toBe(false);
+      expect(lightning.checkedAt).toBeUndefined();
       expect(lightning.strikes).toEqual([]);
       expect(lightning.strikesWithin10kmCount).toBe(0);
       expect(lightning.strikesWithin15kmCount).toBe(0);
       expect(lightning.strikesWithin30kmCount).toBe(0);
       expect(lightning.suspendMatchRecommended).toBe(false);
       expect(lightning.status).toBe('unknown');
-      expect(lightning.safetyAdvisoryFi).toContain('FMI-yhteys katkennut');
+      expect(lightning.safetyAdvisoryFi).toContain('Salamatietoa ei saatu');
     });
 
-    it('returns deterministic cache fallback on HTTP 503 Service Unavailable / 500 Internal Error', async () => {
+    it('returns explicit unavailable / unknown on HTTP 503', async () => {
       vi.stubGlobal(
         'fetch',
         vi.fn().mockResolvedValue({
@@ -233,8 +232,9 @@ describe('Adversarial Stress Test: Protocol SLA, Fallback Honesty & Resilience',
         venueId: 'leppavaara',
       });
 
-      expect(forecast.isCacheFallback).toBe(true);
+      expect(forecast.isCacheFallback).toBe(false);
       expect(forecast.available).toBe(false);
+      expect(forecast.errorFi).toBe('FMI vastasi virheellä (HTTP 503).');
       expect(forecast.venueId).toBe('leppavaara');
       expect(forecast.temperatureC).toBeNull();
       expect(forecast.windGustMs).toBeNull();
@@ -245,12 +245,12 @@ describe('Adversarial Stress Test: Protocol SLA, Fallback Honesty & Resilience',
         venueName: 'Leppävaara',
       });
 
-      expect(lightning.isCacheFallback).toBe(true);
+      expect(lightning.status).toBe('unknown');
       expect(lightning.strikes).toHaveLength(0);
       expect(lightning.suspendMatchRecommended).toBe(false);
     });
 
-    it('triggers timeout fallback when FMI API hangs > 3000 ms', async () => {
+    it('returns unavailable / unknown when FMI hangs past the timeout', async () => {
       vi.stubGlobal(
         'fetch',
         vi.fn().mockImplementation((_url: string, init?: RequestInit) => {
@@ -274,8 +274,8 @@ describe('Adversarial Stress Test: Protocol SLA, Fallback Honesty & Resilience',
         50
       );
 
-      expect(forecast.isCacheFallback).toBe(true);
-      expect(forecast.cacheTimestamp).toBeDefined();
+      expect(forecast.available).toBe(false);
+      expect(forecast.errorFi).toBe('FMI ei vastannut ajoissa.');
 
       const lightning = await fetchPitchLightningRisk(
         {
@@ -285,7 +285,7 @@ describe('Adversarial Stress Test: Protocol SLA, Fallback Honesty & Resilience',
         50
       );
 
-      expect(lightning.isCacheFallback).toBe(true);
+      expect(lightning.status).toBe('unknown');
       expect(lightning.strikes).toHaveLength(0);
       expect(lightning.strikesWithin10kmCount).toBe(0);
     });

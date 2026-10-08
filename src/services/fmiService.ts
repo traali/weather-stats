@@ -1,14 +1,17 @@
 /**
  * FMI Open Data Service (WFS & WMS)
  *
- * Integrates directly with Finnish Meteorological Institute:
- * - WFS Harmonie surface point forecast: fmi::forecast::harmonie::surface::point::simple
- * - WFS Lightning discharges: fmi::observations::lightning::simple
- * - WMS Radar reflectivity: Radar:suomi_dbz_eureffin & Radar:suomi_rr_eureffin
+ * Integrates directly with Finnish Meteorological Institute open data (opendata.fmi.fi/wfs):
+ * - Harmonie point forecast: fmi::forecast::harmonie::surface::point::simple
+ *   (Temperature °C, WindSpeedMS m/s, WindGust m/s, Humidity %, Precipitation1h mm/h)
+ * - Station observations: fmi::observations::weather::timevaluepair, nearest station by distance
+ *   (t2m °C, ws_10min m/s, wg_10min m/s, ri_10min mm/h, r_1h mm)
+ * - Lightning: fmi::observations::lightning::simple (4 rows per flash, grouped back to one)
+ * - WMS Radar reflectivity: Radar:suomi_dbz_eureffin
  * - EUMETSAT satellite cloud cover layers
  *
- * Features defensive timeout controls (AbortSignal) and falls back
- * to verified deterministic cache on network failure (Zero Mock Invariant).
+ * All times from FMI are UTC. Every request has a timeout. When FMI fails, the result
+ * says so: no remembered values, no "no data = safe".
  */
 
 import { XMLParser } from 'fast-xml-parser';
@@ -22,6 +25,9 @@ import {
   RadarSatelliteLayerResult,
   RadarAnimationFrame,
   RadarSatelliteLayerId,
+  ObservedValue,
+  VenueObservationArgs,
+  VenueObservationResult,
 } from '../types/weather';
 import {
   calculateApparentTemperature,
@@ -29,13 +35,12 @@ import {
   getRainOnsetLabel,
 } from '../domain/meteorology';
 import { evaluateTurfSlickness } from '../domain/turfSlickness';
-import { evaluatePitchLightningRisk } from '../domain/lightningSafety';
 import {
-  getDeterministicForecastFallback,
-  getDeterministicLightningFallback,
-  saveForecastToCache,
-  saveLightningToCache,
-} from './weatherCache';
+  evaluatePitchLightningRisk,
+  haversineDistanceKm,
+  unknownLightningRisk,
+} from '../domain/lightningSafety';
+import { unavailableForecast } from './weatherCache';
 
 export const FMI_ENDPOINTS = {
   wfs: 'https://opendata.fmi.fi/wfs',
@@ -43,10 +48,111 @@ export const FMI_ENDPOINTS = {
   eumetWms: 'https://eumetview.eumetsat.int/geoserv/wms',
 };
 
+export const FMI_TIMEOUT_MS = 5000;
+
+/** Forecast parameters requested from Harmonie. Precipitation1h is mm/h (sum over the previous hour). */
+export const FORECAST_PARAMETERS = ['Temperature', 'WindSpeedMS', 'WindGust', 'Humidity', 'Precipitation1h'] as const;
+/** Observation parameters. ri_10min is mm/h, r_1h is mm in the last hour. */
+export const OBSERVATION_PARAMETERS = ['t2m', 'ws_10min', 'wg_10min', 'ri_10min', 'r_1h'] as const;
+/** An observation older than this is not shown as current. */
+export const OBSERVATION_MAX_AGE_MINUTES = 40;
+export const OBSERVATION_RADIUS_KM = 25;
+export const LIGHTNING_RADIUS_KM = 30;
+
 const xmlParser = new XMLParser({
   ignoreAttributes: false,
   attributeNamePrefix: '@_',
+  parseTagValue: false,
+  trimValues: true,
+  isArray: (name) => name === 'wfs:member' || name === 'wml2:point' || name === 'gml:name',
 });
+
+export class FmiError extends Error {
+  constructor(message: string, public readonly reasonFi: string) {
+    super(message);
+    this.name = 'FmiError';
+  }
+}
+
+type XmlNode = Record<string, unknown>;
+
+function asNode(value: unknown): XmlNode | undefined {
+  return value && typeof value === 'object' && !Array.isArray(value) ? (value as XmlNode) : undefined;
+}
+
+function nodeAt(value: unknown, ...path: string[]): unknown {
+  let cur: unknown = value;
+  for (const key of path) {
+    const node = asNode(cur);
+    if (!node) return undefined;
+    cur = node[key];
+  }
+  return cur;
+}
+
+function textOf(value: unknown): string {
+  if (typeof value === 'string') return value.trim();
+  if (typeof value === 'number') return String(value);
+  const node = asNode(value);
+  if (node && '#text' in node) return textOf(node['#text']);
+  return '';
+}
+
+/** FMI sends "NaN" for a missing value. That is null here, never 0. */
+export function parseFmiNumber(value: unknown): number | null {
+  const text = textOf(value);
+  if (text === '') return null;
+  const n = Number(text);
+  return Number.isFinite(n) ? n : null;
+}
+
+function toFmiTime(ms: number): string {
+  return new Date(ms).toISOString().replace(/\.\d{3}Z$/, 'Z');
+}
+
+/**
+ * Returns the wfs:member list of an FMI FeatureCollection.
+ * Throws on an ExceptionReport, HTML, or anything that is not a FeatureCollection,
+ * so an error page can never be read as "zero strikes".
+ */
+export function fmiFeatureMembers(xmlText: string): unknown[] {
+  let parsed: unknown;
+  try {
+    parsed = xmlParser.parse(xmlText);
+  } catch {
+    throw new FmiError('FMI response is not XML', 'FMI:n vastausta ei voitu lukea.');
+  }
+  if (nodeAt(parsed, 'ExceptionReport') !== undefined) {
+    throw new FmiError('FMI ExceptionReport', 'FMI palautti virheen.');
+  }
+  const collection = nodeAt(parsed, 'wfs:FeatureCollection');
+  if (collection === undefined || collection === null) {
+    throw new FmiError('FMI response is not a FeatureCollection', 'FMI:n vastausta ei voitu lukea.');
+  }
+  const members = nodeAt(collection, 'wfs:member');
+  return Array.isArray(members) ? members : [];
+}
+
+async function fetchFmiXml(url: string, timeoutMs: number): Promise<string> {
+  let res: Response;
+  try {
+    res = await fetch(url, { signal: AbortSignal.timeout(timeoutMs) });
+  } catch (err) {
+    const name = err instanceof Error ? err.name : '';
+    if (name === 'TimeoutError' || name === 'AbortError') {
+      throw new FmiError('FMI timeout', 'FMI ei vastannut ajoissa.');
+    }
+    throw new FmiError('FMI network error', 'FMI ei vastannut.');
+  }
+  if (!res.ok) {
+    throw new FmiError(`FMI HTTP ${res.status}`, `FMI vastasi virheellä (HTTP ${res.status}).`);
+  }
+  return res.text();
+}
+
+function reasonOf(err: unknown): string {
+  return err instanceof FmiError ? err.reasonFi : 'FMI ei vastannut.';
+}
 
 /**
  * Computes bounding box around pitch with aspect ratio compensation for Finnish latitude (~60°N)
@@ -95,173 +201,341 @@ export function buildWmsTileUrl(
   }
 }
 
-/**
- * Fetches Harmonie surface point forecast from FMI WFS
- */
-export async function fetchVenueWeatherForecast(
+/** Parsed BsWfs simple-feature rows: time -> parameter -> value (null for NaN). */
+export function parseSimpleFeatureRows(xmlText: string): Map<string, Record<string, number | null>> {
+  const rows = new Map<string, Record<string, number | null>>();
+  for (const member of fmiFeatureMembers(xmlText)) {
+    const el = nodeAt(member, 'BsWfs:BsWfsElement');
+    if (!el) continue;
+    const time = textOf(nodeAt(el, 'BsWfs:Time'));
+    const param = textOf(nodeAt(el, 'BsWfs:ParameterName'));
+    if (!time || !param || !Number.isFinite(new Date(time).getTime())) continue;
+    const entry = rows.get(time) ?? {};
+    entry[param] = parseFmiNumber(nodeAt(el, 'BsWfs:ParameterValue'));
+    rows.set(time, entry);
+  }
+  return rows;
+}
+
+/** Forecast time step closest to kickoff, if one is within 60 minutes. */
+export function pickForecastTime(times: string[], kickoffIso: string): string | undefined {
+  const kickoffMs = new Date(kickoffIso).getTime();
+  if (!Number.isFinite(kickoffMs)) return undefined;
+  let best: string | undefined;
+  let bestDiff = Infinity;
+  for (const t of times) {
+    const diff = Math.abs(new Date(t).getTime() - kickoffMs);
+    if (diff < bestDiff) {
+      bestDiff = diff;
+      best = t;
+    }
+  }
+  return bestDiff <= 60 * 60 * 1000 ? best : undefined;
+}
+
+const round1 = (n: number | null): number | null => (n == null ? null : Math.round(n * 10) / 10);
+
+/** Builds the forecast result from an FMI Harmonie simple-feature response. */
+export function buildForecastFromXml(
+  xmlText: string,
   args: VenueWeatherForecastArgs,
-  timeoutMs: number = 3000
-): Promise<VenueWeatherForecastResult> {
+  fetchedAt: string = new Date().toISOString()
+): VenueWeatherForecastResult {
   const { lat, lng, kickoffTime, venueId, venueName } = args;
   const coords: Coordinates = { lat, lng };
+  const rows = parseSimpleFeatureRows(xmlText);
+  const times = Array.from(rows.keys()).sort();
+  const at = pickForecastTime(times, kickoffTime);
+  if (!at) {
+    return unavailableForecast(coords, kickoffTime, venueId, venueName, 'FMI ei palauttanut ennustetta tälle ajalle.');
+  }
+  const row = rows.get(at) ?? {};
+  const temp = row.Temperature ?? null;
+  const wind = row.WindSpeedMS ?? null;
+  const gust = row.WindGust ?? null;
+  const humidity = row.Humidity ?? null;
+  const rain = row.Precipitation1h ?? null;
 
-  const kickoffDate = new Date(kickoffTime);
-  const startTime = new Date(kickoffDate.getTime() - 30 * 60 * 1000).toISOString();
-  const endTime = new Date(kickoffDate.getTime() + 120 * 60 * 1000).toISOString();
-
-  const queryUrl = `${FMI_ENDPOINTS.wfs}?service=WFS&version=2.0.0&request=getFeature&storedquery_id=fmi::forecast::harmonie::surface::point::simple&latlon=${lat},${lng}&starttime=${encodeURIComponent(startTime)}&endtime=${encodeURIComponent(endTime)}&timestep=15`;
-
-  try {
-    const res = await fetch(queryUrl, { signal: AbortSignal.timeout(timeoutMs) });
-    if (!res.ok) throw new Error(`FMI WFS error: HTTP ${res.status}`);
-
-    const xmlText = await res.text();
-    const parsed = xmlParser.parse(xmlText);
-
-    const members = parsed?.['wfs:FeatureCollection']?.['wfs:member'];
-    const memberArray = Array.isArray(members) ? members : members ? [members] : [];
-
-    let temp = Number.NaN;
-    let wind = Number.NaN;
-    let gust = Number.NaN;
-    let rain = Number.NaN;
-    let humidity: number | undefined;
-    const rainTimeline: Array<{ time: string; precipitationMmh: number }> = [];
-
-    for (const member of memberArray) {
-      const bsWfs = member?.['BsWfs:BsWfsElement'];
-      if (!bsWfs) continue;
-      const param = String(bsWfs['BsWfs:ParameterName'] || '');
-      const val = parseFloat(String(bsWfs['BsWfs:ParameterValue'] || 'NaN'));
-      const time = String(bsWfs['BsWfs:Time'] || '');
-
-      if (!Number.isFinite(val)) continue;
-
-      if (param === 'Temperature' && Number.isNaN(temp)) temp = val;
-      if (param === 'WindSpeedMS' && Number.isNaN(wind)) wind = val;
-      if (param === 'WindGust' && Number.isNaN(gust)) gust = val;
-      if (param === 'Humidity') humidity = val;
-      if (param === 'PrecipitationAmount') {
-        const pVal = Math.max(0, val);
-        if (!Number.isFinite(rain)) rain = pVal;
-        rainTimeline.push({ time, precipitationMmh: pVal });
-      }
-    }
-
-    if (!Number.isFinite(temp) || !Number.isFinite(wind)) {
-      throw new Error('FMI forecast payload missing valid Temperature or WindSpeed');
-    }
-
-    const feelsLike = calculateApparentTemperature(temp, wind, humidity ?? 0);
-    const rainKnown = Number.isFinite(rain);
-    const turf = rainKnown ? evaluateTurfSlickness(temp, rain) : null;
-    const windAdvisoryBadge = Number.isFinite(gust) ? getWindAdvisoryBadge(gust) : undefined;
-    const { label: rainOnsetLabel, minutesUntilRain: rainCountdownMinutes } = getRainOnsetLabel(
-      kickoffTime,
-      rainTimeline
-    );
-
-    const uiResourceUri = `ui://weather/venue-card?venueId=${venueId || 'venue'}&lat=${lat}&lng=${lng}&kickoff=${encodeURIComponent(kickoffTime)}`;
-
-    const result: VenueWeatherForecastResult = {
-      venueId,
-      venueName,
-      coordinates: coords,
-      kickoffTime,
-      temperatureC: Math.round(temp * 10) / 10,
-      feelsLikeC: feelsLike,
-      windSpeedMs: Math.round(wind * 10) / 10,
-      windGustMs: Number.isFinite(gust) ? Math.round(gust * 10) / 10 : null,
-      precipitationMmh: rainKnown ? Math.round(rain * 10) / 10 : null,
-      rainTimeline,
-      rainCountdownMinutes,
-      rainOnsetLabel,
-      turfCondition: turf?.condition ?? 'dry',
-      turfConditionLabelFi: turf?.labelFi ?? '—',
-      windAdvisoryBadge,
-      available: true,
-      isCacheFallback: false,
-      uiResourceUri,
-    };
-
-    saveForecastToCache(result);
-    return result;
-  } catch {
-    // Zero-mock fallback: Retrieve deterministic cached snapshot
-    return getDeterministicForecastFallback(coords, kickoffTime, venueId, venueName);
+  if (temp == null && wind == null && gust == null && rain == null) {
+    return unavailableForecast(coords, kickoffTime, venueId, venueName, 'FMI ei palauttanut lukemia.');
   }
 
+  const rainTimeline: Array<{ time: string; precipitationMmh: number }> = [];
+  for (const t of times) {
+    const v = rows.get(t)?.Precipitation1h;
+    if (v != null) rainTimeline.push({ time: t, precipitationMmh: Math.max(0, v) });
+  }
+
+  const rainMmh = rain == null ? null : Math.max(0, rain);
+  const turf = temp != null && rainMmh != null ? evaluateTurfSlickness(temp, rainMmh) : null;
+  const { label: rainOnsetLabel, minutesUntilRain: rainCountdownMinutes } = getRainOnsetLabel(
+    kickoffTime,
+    rainTimeline
+  );
+
+  return {
+    venueId,
+    venueName,
+    coordinates: coords,
+    kickoffTime,
+    temperatureC: round1(temp),
+    feelsLikeC: calculateApparentTemperature(temp, wind, humidity),
+    windSpeedMs: round1(wind),
+    windGustMs: round1(gust),
+    precipitationMmh: round1(rainMmh),
+    rainTimeline,
+    rainCountdownMinutes,
+    rainOnsetLabel,
+    turfCondition: turf?.condition ?? 'dry',
+    turfConditionLabelFi: turf?.labelFi ?? '—',
+    windAdvisoryBadge: gust != null ? getWindAdvisoryBadge(gust) : undefined,
+    available: true,
+    isCacheFallback: false,
+    forecastTime: at,
+    fetchedAt,
+    uiResourceUri: `ui://weather/venue-card?venueId=${venueId || 'venue'}&lat=${lat}&lng=${lng}&kickoff=${encodeURIComponent(kickoffTime)}`,
+  };
+}
+
+export function buildForecastUrl(args: VenueWeatherForecastArgs): string {
+  const kickoffMs = new Date(args.kickoffTime).getTime();
+  const start = toFmiTime(kickoffMs - 30 * 60 * 1000);
+  const end = toFmiTime(kickoffMs + 120 * 60 * 1000);
+  return `${FMI_ENDPOINTS.wfs}?service=WFS&version=2.0.0&request=getFeature&storedquery_id=fmi::forecast::harmonie::surface::point::simple&latlon=${args.lat},${args.lng}&starttime=${encodeURIComponent(start)}&endtime=${encodeURIComponent(end)}&timestep=15&parameters=${FORECAST_PARAMETERS.join(',')}`;
 }
 
 /**
- * Fetches lightning discharges from FMI WFS and evaluates 30/30 safety rule
+ * Fetches the Harmonie point forecast for the kickoff time.
+ * On any failure: an explicit unavailable result. Never an old reading.
+ */
+export async function fetchVenueWeatherForecast(
+  args: VenueWeatherForecastArgs,
+  timeoutMs: number = FMI_TIMEOUT_MS
+): Promise<VenueWeatherForecastResult> {
+  const coords: Coordinates = { lat: args.lat, lng: args.lng };
+  if (!Number.isFinite(args.lat) || !Number.isFinite(args.lng) || !Number.isFinite(new Date(args.kickoffTime).getTime())) {
+    return unavailableForecast(coords, args.kickoffTime, args.venueId, args.venueName, 'Paikka tai aika puuttuu.');
+  }
+  const fetchedAt = new Date().toISOString();
+  try {
+    const xmlText = await fetchFmiXml(buildForecastUrl(args), timeoutMs);
+    return buildForecastFromXml(xmlText, args, fetchedAt);
+  } catch (err) {
+    return unavailableForecast(coords, args.kickoffTime, args.venueId, args.venueName, reasonOf(err));
+  }
+}
+
+export interface FmiStationSeries {
+  fmisid: string;
+  name: string;
+  lat: number;
+  lng: number;
+  /** parameter -> points sorted by time */
+  series: Record<string, Array<{ time: string; value: number | null }>>;
+}
+
+/** Parses fmi::observations::weather::timevaluepair into one entry per station. */
+export function parseObservationStations(xmlText: string): FmiStationSeries[] {
+  const stations = new Map<string, FmiStationSeries>();
+  for (const member of fmiFeatureMembers(xmlText)) {
+    const obs = nodeAt(member, 'omso:PointTimeSeriesObservation');
+    if (!obs) continue;
+    const href = String(nodeAt(obs, 'om:observedProperty', '@_xlink:href') ?? '');
+    const param = /[?&]param=([^&]+)/.exec(href)?.[1];
+    const feature = nodeAt(obs, 'om:featureOfInterest', 'sams:SF_SpatialSamplingFeature');
+    const location = nodeAt(feature, 'sam:sampledFeature', 'target:LocationCollection', 'target:member', 'target:Location');
+    const fmisid = textOf(nodeAt(location, 'gml:identifier'));
+    const names = nodeAt(location, 'gml:name');
+    let name = '';
+    if (Array.isArray(names)) {
+      const byCode = names.find((n) => String(nodeAt(n, '@_codeSpace') ?? '').endsWith('/name'));
+      name = textOf(byCode ?? names[0]);
+    }
+    const pos = textOf(nodeAt(feature, 'sams:shape', 'gml:Point', 'gml:pos'));
+    const [lat, lng] = pos.split(/\s+/).map(Number);
+    if (!param || !fmisid || !Number.isFinite(lat) || !Number.isFinite(lng)) continue;
+
+    const station = stations.get(fmisid) ?? { fmisid, name: name || fmisid, lat, lng, series: {} };
+    const points = nodeAt(obs, 'om:result', 'wml2:MeasurementTimeseries', 'wml2:point');
+    const list: Array<{ time: string; value: number | null }> = [];
+    if (Array.isArray(points)) {
+      for (const p of points) {
+        const tvp = nodeAt(p, 'wml2:MeasurementTVP');
+        const time = textOf(nodeAt(tvp, 'wml2:time'));
+        if (!time || !Number.isFinite(new Date(time).getTime())) continue;
+        list.push({ time, value: parseFmiNumber(nodeAt(tvp, 'wml2:value')) });
+      }
+    }
+    list.sort((a, b) => a.time.localeCompare(b.time));
+    station.series[param] = list;
+    stations.set(fmisid, station);
+  }
+  return Array.from(stations.values());
+}
+
+/**
+ * Nearest station with a fresh value for one parameter.
+ * Fresh = the station's latest non-missing value is at most `maxAgeMinutes` old.
+ */
+export function nearestObservedValue(
+  stations: FmiStationSeries[],
+  coords: Coordinates,
+  param: string,
+  referenceMs: number,
+  maxAgeMinutes: number = OBSERVATION_MAX_AGE_MINUTES
+): ObservedValue | null {
+  let best: ObservedValue | null = null;
+  for (const st of stations) {
+    const points = st.series[param] ?? [];
+    let latest: { time: string; value: number } | undefined;
+    for (const p of points) {
+      if (p.value == null) continue;
+      if (!latest || p.time > latest.time) latest = { time: p.time, value: p.value };
+    }
+    if (!latest) continue;
+    const ageMs = referenceMs - new Date(latest.time).getTime();
+    if (ageMs > maxAgeMinutes * 60 * 1000 || ageMs < -10 * 60 * 1000) continue;
+    const distanceKm = haversineDistanceKm(coords.lat, coords.lng, st.lat, st.lng);
+    if (!best || distanceKm < best.distanceKm) {
+      best = {
+        value: Math.round(latest.value * 10) / 10,
+        time: latest.time,
+        stationName: st.name,
+        fmisid: st.fmisid,
+        distanceKm: Math.round(distanceKm * 10) / 10,
+      };
+    }
+  }
+  return best;
+}
+
+export function buildObservationFromXml(
+  xmlText: string,
+  args: VenueObservationArgs,
+  fetchedAt: string = new Date().toISOString()
+): VenueObservationResult {
+  const coords: Coordinates = { lat: args.lat, lng: args.lng };
+  const refMs = args.referenceTime ? new Date(args.referenceTime).getTime() : Date.now();
+  const stations = parseObservationStations(xmlText);
+  const pick = (param: string) => nearestObservedValue(stations, coords, param, refMs);
+  const temperature = pick('t2m');
+  const result: VenueObservationResult = {
+    venueName: args.venueName,
+    coordinates: coords,
+    available: temperature != null,
+    stationName: temperature?.stationName,
+    fmisid: temperature?.fmisid,
+    distanceKm: temperature?.distanceKm,
+    observedAt: temperature?.time,
+    temperature,
+    windSpeed: pick('ws_10min'),
+    windGust: pick('wg_10min'),
+    precipitationIntensity: pick('ri_10min'),
+    precipitation1h: pick('r_1h'),
+    fetchedAt,
+  };
+  if (!temperature) {
+    result.errorFi = `FMI:ltä ei saatu tuoretta lämpötilahavaintoa ${OBSERVATION_RADIUS_KM} km säteeltä.`;
+  }
+  return result;
+}
+
+export function unavailableObservation(args: VenueObservationArgs, errorFi: string): VenueObservationResult {
+  return {
+    venueName: args.venueName,
+    coordinates: { lat: args.lat, lng: args.lng },
+    available: false,
+    temperature: null,
+    windSpeed: null,
+    windGust: null,
+    precipitationIntensity: null,
+    precipitation1h: null,
+    fetchedAt: new Date().toISOString(),
+    errorFi,
+  };
+}
+
+export function buildObservationUrl(args: VenueObservationArgs): string {
+  const refMs = args.referenceTime ? new Date(args.referenceTime).getTime() : Date.now();
+  const bbox = calculateWeatherBbox({ lat: args.lat, lng: args.lng }, OBSERVATION_RADIUS_KM);
+  const start = toFmiTime(refMs - 60 * 60 * 1000);
+  const end = toFmiTime(refMs);
+  return `${FMI_ENDPOINTS.wfs}?service=WFS&version=2.0.0&request=getFeature&storedquery_id=fmi::observations::weather::timevaluepair&bbox=${bbox.minLng},${bbox.minLat},${bbox.maxLng},${bbox.maxLat}&starttime=${encodeURIComponent(start)}&endtime=${encodeURIComponent(end)}&timestep=10&parameters=${OBSERVATION_PARAMETERS.join(',')}`;
+}
+
+/** Latest FMI station observations nearest to the venue. */
+export async function fetchVenueObservation(
+  args: VenueObservationArgs,
+  timeoutMs: number = FMI_TIMEOUT_MS
+): Promise<VenueObservationResult> {
+  if (!Number.isFinite(args.lat) || !Number.isFinite(args.lng)) {
+    return unavailableObservation(args, 'Paikka puuttuu.');
+  }
+  const fetchedAt = new Date().toISOString();
+  try {
+    const xmlText = await fetchFmiXml(buildObservationUrl(args), timeoutMs);
+    return buildObservationFromXml(xmlText, args, fetchedAt);
+  } catch (err) {
+    return unavailableObservation(args, reasonOf(err));
+  }
+}
+
+/**
+ * Parses fmi::observations::lightning::simple. FMI sends four rows per flash
+ * (multiplicity, peak_current, cloud_indicator, ellipse_major); they are grouped back
+ * into one strike by position + time.
+ */
+export function parseLightningStrikes(
+  xmlText: string
+): Array<{ lat: number; lng: number; timeIso: string; peakCurrentKa?: number; cloudToGround?: boolean }> {
+  const flashes = new Map<string, { lat: number; lng: number; timeIso: string; peakCurrentKa?: number; cloudToGround?: boolean }>();
+  for (const member of fmiFeatureMembers(xmlText)) {
+    const el = nodeAt(member, 'BsWfs:BsWfsElement');
+    if (!el) continue;
+    const pos = textOf(nodeAt(el, 'BsWfs:Location', 'gml:Point', 'gml:pos'));
+    const timeIso = textOf(nodeAt(el, 'BsWfs:Time'));
+    if (!pos || !timeIso) continue;
+    const [lat, lng] = pos.split(/\s+/).map(Number);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
+    const key = `${lat.toFixed(5)},${lng.toFixed(5)},${timeIso}`;
+    const flash = flashes.get(key) ?? { lat, lng, timeIso };
+    const param = textOf(nodeAt(el, 'BsWfs:ParameterName'));
+    const value = parseFmiNumber(nodeAt(el, 'BsWfs:ParameterValue'));
+    if (param === 'peak_current' && value != null) flash.peakCurrentKa = value;
+    if (param === 'cloud_indicator' && value != null) flash.cloudToGround = value === 0;
+    flashes.set(key, flash);
+  }
+  return Array.from(flashes.values());
+}
+
+export function buildLightningUrl(coords: Coordinates, refMs: number): string {
+  const bbox = calculateWeatherBbox(coords, LIGHTNING_RADIUS_KM);
+  const start = toFmiTime(refMs - 60 * 60 * 1000);
+  const end = toFmiTime(refMs + 5 * 60 * 1000);
+  return `${FMI_ENDPOINTS.wfs}?service=WFS&version=2.0.0&request=getFeature&storedquery_id=fmi::observations::lightning::simple&bbox=${bbox.minLng},${bbox.minLat},${bbox.maxLng},${bbox.maxLat}&starttime=${encodeURIComponent(start)}&endtime=${encodeURIComponent(end)}`;
+}
+
+/**
+ * Fetches lightning flashes from FMI and evaluates the 30/30 rule.
+ * A failed or unreadable check is status 'unknown' ("Salamatietoa ei saatu"), never 'clear'.
  */
 export async function fetchPitchLightningRisk(
   args: PitchLightningRiskArgs,
-  timeoutMs: number = 3000
+  timeoutMs: number = FMI_TIMEOUT_MS
 ): Promise<PitchLightningRiskResult> {
-  const { lat, lng, perimeterKm = 15, referenceTime, venueName } = args;
+  const { lat, lng, referenceTime, venueName } = args;
   const coords: Coordinates = { lat, lng };
-
   const refMs = referenceTime ? new Date(referenceTime).getTime() : Date.now();
-  const startTime = new Date(refMs - 60 * 60 * 1000).toISOString();
-  const endTime = new Date(refMs + 5 * 60 * 1000).toISOString();
-
-  // Bbox around pitch for lightning query
-  const bbox = calculateWeatherBbox(coords, Math.min(30, perimeterKm * 1.5));
-  const queryUrl = `${FMI_ENDPOINTS.wfs}?service=WFS&version=2.0.0&request=getFeature&storedquery_id=fmi::observations::lightning::simple&bbox=${bbox.minLng},${bbox.minLat},${bbox.maxLng},${bbox.maxLat}&starttime=${encodeURIComponent(startTime)}&endtime=${encodeURIComponent(endTime)}`;
-
-  try {
-    const res = await fetch(queryUrl, { signal: AbortSignal.timeout(timeoutMs) });
-    if (!res.ok) throw new Error(`FMI Lightning query error: HTTP ${res.status}`);
-
-    const xmlText = await res.text();
-    const parsed = xmlParser.parse(xmlText);
-
-    const members = parsed?.['wfs:FeatureCollection']?.['wfs:member'];
-    const memberArray = Array.isArray(members) ? members : members ? [members] : [];
-
-    const rawStrikes: Array<{ lat: number; lng: number; timeIso: string; peakCurrentKa?: number }> = [];
-
-    for (const member of memberArray) {
-      const bsWfs = member?.['BsWfs:BsWfsElement'];
-      if (!bsWfs) continue;
-      const pos = String(bsWfs['gml:pos'] || '').trim();
-      const timeIso = String(bsWfs['BsWfs:Time'] || '');
-      const param = String(bsWfs['BsWfs:ParameterName'] || '');
-      const val = parseFloat(String(bsWfs['BsWfs:ParameterValue'] || 'NaN'));
-
-      if (!pos || !timeIso) continue;
-      const [posLat, posLng] = pos.split(/\s+/).map((n) => parseFloat(n));
-      if (!posLat || !posLng || Number.isNaN(posLat) || Number.isNaN(posLng)) continue;
-
-      let currentKa: number | undefined;
-      if (param === 'peak_current' && Number.isFinite(val)) {
-        currentKa = val;
-      }
-
-      rawStrikes.push({
-        lat: posLat,
-        lng: posLng,
-        timeIso,
-        peakCurrentKa: currentKa,
-      });
-    }
-
-    const result = evaluatePitchLightningRisk(
-      coords,
-      rawStrikes,
-      refMs,
-      venueName,
-      false
-    );
-
-    saveLightningToCache(coords, result);
-    return result;
-  } catch {
-    return getDeterministicLightningFallback(coords, venueName);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng) || !Number.isFinite(refMs)) {
+    return unknownLightningRisk(coords, venueName, 'Paikka tai aika puuttuu.');
   }
-
+  try {
+    const xmlText = await fetchFmiXml(buildLightningUrl(coords, refMs), timeoutMs);
+    const strikes = parseLightningStrikes(xmlText);
+    return evaluatePitchLightningRisk(coords, strikes, refMs, venueName, false, undefined, new Date().toISOString());
+  } catch (err) {
+    return unknownLightningRisk(coords, venueName, reasonOf(err));
+  }
 }
 
 /**
