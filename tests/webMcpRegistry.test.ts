@@ -1,10 +1,33 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { isNativeModelContext, registerWeatherWebMCP } from '../src/mcp-app';
 import { setupMockDom } from './setupDom';
 
+const fixture = (name: string) =>
+  readFileSync(fileURLToPath(new URL(`./fixtures/${name}`, import.meta.url)), 'utf-8');
+
+/** Real FMI responses recorded 2026-10-08. Tests never call opendata.fmi.fi (it made CI flaky). */
+const FORECAST_XML = fixture('fmi-forecast-vaiski-2026-10-08T1500Z.xml');
+const LIGHTNING_EMPTY_XML = fixture('fmi-lightning-vaiski-empty-2026-10-08.xml');
+const KICKOFF = '2026-10-08T15:00:00.000Z';
+
 describe('WebMCP Tri-Mount Registry & Model Context Standards', () => {
   beforeEach(() => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async (url: string | URL) => {
+        const u = String(url);
+        if (u.includes('harmonie')) return new Response(FORECAST_XML, { status: 200 });
+        if (u.includes('lightning')) return new Response(LIGHTNING_EMPTY_XML, { status: 200 });
+        throw new Error(`unexpected network call in test: ${u}`);
+      })
+    );
     setupMockDom();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
 
@@ -59,7 +82,7 @@ describe('WebMCP Tri-Mount Registry & Model Context Standards', () => {
     const result = (await registry.executeTool('get_venue_weather_forecast', {
       lat: 60.1873,
       lng: 24.9258,
-      kickoffTime: '2026-09-12T14:00:00.000Z',
+      kickoffTime: KICKOFF,
       venueId: 'vaiski',
     })) as {
       temperatureC: number | null;
@@ -69,13 +92,11 @@ describe('WebMCP Tri-Mount Registry & Model Context Standards', () => {
       uiResourceUri: string;
     };
 
-    expect(result.temperatureC === null || typeof result.temperatureC === 'number').toBe(true);
-    expect(result.feelsLikeC === null || typeof result.feelsLikeC === 'number').toBe(true);
+    // FMI Harmonie value for Väiski at 15:00Z in the recorded response.
+    expect(result.temperatureC).toBe(12.4);
+    expect(typeof result.feelsLikeC).toBe('number');
     expect(['dry', 'slick', 'frozen', 'snowy']).toContain(result.turfCondition);
     expect(result.uiResourceUri).toContain('ui://weather/venue-card');
-    if (result.temperatureC === null) {
-      expect(result.available).toBe(false);
-    }
   });
 
   it('executeTool runs get_pitch_lightning_risk and returns 30/30 safety result', async () => {
@@ -91,7 +112,8 @@ describe('WebMCP Tri-Mount Registry & Model Context Standards', () => {
       uiResourceUri: string;
     };
 
-    expect(['clear', 'watch', 'danger', 'unknown']).toContain(result.status);
+    // FMI answered with no strikes: clear is allowed only because FMI answered.
+    expect(result.status).toBe('clear');
     expect(typeof result.suspendMatchRecommended).toBe('boolean');
     expect(result.uiResourceUri).toContain('ui://weather/lightning-radar');
   });
@@ -122,7 +144,7 @@ describe('WebMCP Tri-Mount Registry & Model Context Standards', () => {
       arguments: {
         lat: 60.1873,
         lng: 24.9258,
-        kickoffTime: '2026-09-12T14:00:00.000Z',
+        kickoffTime: KICKOFF,
       },
     });
 
