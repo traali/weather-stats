@@ -1,4 +1,6 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 import { registerWeatherWebMCP } from '../src/mcp-app';
 import { setupMockDom } from './setupDom';
 
@@ -7,8 +9,18 @@ const SLA_MS = process.env.CI ? 2500 : 500;
 
 describe('Cross-Frame postMessage Bridge & 500ms SLA Verification', () => {
   beforeEach(() => {
+    // Real FMI Harmonie response (Väiski, 2026-10-08). No network in tests.
+    const xml = readFileSync(
+      fileURLToPath(new URL('./fixtures/fmi-forecast-vaiski-2026-10-08T1500Z.xml', import.meta.url)),
+      'utf-8'
+    );
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(xml, { status: 200 })));
     setupMockDom();
     registerWeatherWebMCP();
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it('resolves tools/list request via postMessage within 500 ms SLA', async () => {
@@ -67,9 +79,9 @@ describe('Cross-Frame postMessage Bridge & 500ms SLA Verification', () => {
         params: {
           name: 'get_venue_weather_forecast',
           arguments: {
-            lat: 60.1873,
-            lng: 24.9258,
-            kickoffTime: '2026-09-12T14:00:00.000Z',
+            lat: 60.1872,
+            lng: 24.9232,
+            kickoffTime: '2026-10-08T15:00:00.000Z',
             venueId: 'vaiski',
           },
         },

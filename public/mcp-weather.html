@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Weather Stats MCP Widget</title>
+  <title>Sää kentällä — widget</title>
   <style>
     :root {
       --color-canvas: #090d16;
@@ -127,22 +127,22 @@
 <body>
   <div class="widget-card" id="card">
     <div class="header">
-      <span class="venue-title" id="venueName">Töölön Pallokenttä</span>
-      <span class="badge badge-turf-dry" id="turfBadge">Kenttä: Kuiva</span>
+      <span class="venue-title" id="venueName">Pelipaikka</span>
+      <span class="badge" id="turfBadge">Kenttä: —</span>
     </div>
     <div class="temp-row">
-      <span class="temp-primary" id="temp">14.5°C</span>
-      <span class="feels-like" id="feelsLike">Tuntuu kuin 13°C</span>
+      <span class="temp-primary" id="temp">—</span>
+      <span class="feels-like" id="feelsLike"></span>
     </div>
     <div id="rainCountdown" style="font-size: var(--nv-text-xs); color: var(--color-weather-rain); margin-bottom: 6px;"></div>
     <div class="metrics-grid">
       <div class="metric-item">
         <span>Tuuli / Puuska</span>
-        <div class="metric-value" id="wind">3.2 / 5.8 m/s</div>
+        <div class="metric-value" id="wind">—</div>
       </div>
       <div class="metric-item">
         <span>Sade</span>
-        <div class="metric-value" id="precip">0.0 mm/h</div>
+        <div class="metric-value" id="precip">—</div>
       </div>
     </div>
     <div id="alertBanner" class="alert-banner"></div>
@@ -167,38 +167,39 @@
       window.parent.postMessage({ type: 'mcp:ready', protocolVersion: '2026-01' }, '*');
     }
 
+    function num(v) {
+      return typeof v === 'number' && Number.isFinite(v) ? v : null;
+    }
+
+    // Every update replaces every field. A missing value is shown as '—', never 0 or NaN.
     function updateView(data) {
       if (!data) return;
-      if (data.venueName) document.getElementById('venueName').textContent = data.venueName;
-      if (typeof data.temperatureC === 'number' && Number.isFinite(data.temperatureC)) {
-        document.getElementById('temp').textContent = `${data.temperatureC.toFixed(1)}°C`;
-      }
-      if (typeof data.feelsLikeC === 'number' && Number.isFinite(data.feelsLikeC)) {
-        document.getElementById('feelsLike').textContent = `Tuntuu kuin ${data.feelsLikeC.toFixed(1)}°C`;
-      }
-      if (typeof data.windSpeedMs === 'number' && Number.isFinite(data.windSpeedMs)) {
-        const gust = typeof data.windGustMs === 'number' && Number.isFinite(data.windGustMs)
-          ? ` / ${data.windGustMs.toFixed(1)}`
-          : '';
-        document.getElementById('wind').textContent = `${data.windSpeedMs.toFixed(1)}${gust} m/s`;
-      }
-      if (typeof data.precipitationMmh === 'number' && Number.isFinite(data.precipitationMmh)) {
-        document.getElementById('precip').textContent = `${data.precipitationMmh.toFixed(1)} mm/h`;
-      }
-      if (data.turfConditionLabelFi) {
-        const tb = document.getElementById('turfBadge');
-        tb.textContent = `Kenttä: ${data.turfConditionLabelFi}`;
-        tb.className = `badge badge-turf-${data.turfCondition || 'dry'}`;
-      }
-      if (data.rainOnsetLabel) {
-        const rc = document.getElementById('rainCountdown');
-        rc.textContent = data.rainOnsetLabel;
-        rc.style.display = 'block';
-      }
-      if (data.safetyAdvisoryFi || data.alertMessage) {
-        const ab = document.getElementById('alertBanner');
-        ab.textContent = data.safetyAdvisoryFi || data.alertMessage;
+      document.getElementById('venueName').textContent = data.venueName || 'Pelipaikka';
+      const t = num(data.temperatureC);
+      document.getElementById('temp').textContent = t != null ? `${t.toFixed(1)}°C` : '—';
+      const f = num(data.feelsLikeC);
+      document.getElementById('feelsLike').textContent = f != null ? `Tuntuu kuin ${f.toFixed(1)}°C` : '';
+      const w = num(data.windSpeedMs);
+      const g = num(data.windGustMs);
+      document.getElementById('wind').textContent = w != null ? `${w.toFixed(1)}${g != null ? ` / ${g.toFixed(1)}` : ''} m/s` : '—';
+      const p = num(data.precipitationMmh);
+      document.getElementById('precip').textContent = p != null ? `${p.toFixed(1)} mm/h` : '—';
+      const tb = document.getElementById('turfBadge');
+      const turfKnown = data.turfConditionLabelFi && data.turfConditionLabelFi !== '—';
+      tb.textContent = `Kenttä: ${turfKnown ? data.turfConditionLabelFi : '—'}`;
+      tb.className = turfKnown ? `badge badge-turf-${data.turfCondition || 'dry'}` : 'badge';
+      const rc = document.getElementById('rainCountdown');
+      rc.textContent = data.rainOnsetLabel || '';
+      const ab = document.getElementById('alertBanner');
+      if (data.status === 'danger' || data.status === 'watch') {
+        ab.textContent = data.alertMessage || data.safetyAdvisoryFi || '';
         ab.className = `alert-banner ${data.status === 'danger' ? 'alert-danger' : 'alert-watch'}`;
+      } else if (data.status === 'unknown') {
+        ab.textContent = 'Salamatietoa ei saatu. Älä oleta, että ukkosta ei ole.';
+        ab.className = 'alert-banner alert-watch';
+      } else {
+        ab.textContent = '';
+        ab.className = 'alert-banner';
       }
     }
 

@@ -25,3 +25,6 @@ Append-only record of architectural decisions, dispensations, rule amendments, a
 - **Office / Author:** Legate
 - **Verdict:** PASS
 - **Summary:** Vendored check-neighbors.mjs into visit. Graph: federation.neighbors.json. 5-point HOUSE_TEST_SPEC.md. SupportedSport includes weather. Future contract/rule breaks fail closed.
+
+## 2026-10-08 — RULE: no cache fallback
+§2/§4 amended. The "deterministic cache fallback" let an old temperature and an old "clear" lightning check be shown as current. The rule is now: FMI failure = explicit "ei saatu", never a remembered value.

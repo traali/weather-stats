@@ -9,6 +9,8 @@
  * - Wind gust advisories & zero-token-leak WhatsApp briefings
  */
 
+import { formatHelsinkiTime } from './helsinkiTime';
+
 /**
  * Siple-Passel empirical wind chill formula (1945)
  * @param tempC Air temperature in °C
@@ -41,21 +43,20 @@ export function calculateJagtiWindChill(tempC: number, windSpeedMs: number): num
 }
 
 /**
- * Official FMI continuous feels-like formula ("Tuntuu kuin")
- * Disclosed by Ilmatieteen laitos in official public information requests:
- * T_feels = 15 + (22/37)*T + (15/37)*(V_kmh + 1)^0.16 * (T - 37)
- * 
- * Continuous boundary property: when V = 0, T_feels = T exactly.
+ * FMI wind-chill part of the "Tuntuu kuin" temperature.
+ * Same as FmiFeelsLikeTemperature in fmidev/smartmet-library-newbase (NFmiMetMath.cpp):
+ *   chill = a + (1 - a/t0)*T + (a/t0)*(V + 1)^0.16 * (T - t0),  a = 15, t0 = 37
+ * V is in m/s. FMI fitted the coefficients for m/s; feeding km/h makes it several degrees too cold.
+ * Continuous boundary property: when V = 0, the result is T exactly.
  * @param tempC Air temperature in °C
  * @param windSpeedMs Wind speed in m/s
  */
 export function calculateFmiFeelsLike(tempC: number, windSpeedMs: number): number {
-  const vKmh = Math.max(0, windSpeedMs * 3.6);
-  if (vKmh === 0) {
-    return Math.round(tempC * 10) / 10;
-  }
-  const feels = 15 + (22 / 37) * tempC + (15 / 37) * Math.pow(vKmh + 1, 0.16) * (tempC - 37);
-  return Math.round(feels * 10) / 10;
+  const v = Math.max(0, windSpeedMs);
+  const a = 15.0;
+  const t0 = 37.0;
+  const chill = a + (1 - a / t0) * tempC + (a / t0) * Math.pow(v + 1, 0.16) * (tempC - t0);
+  return Math.round(chill * 10) / 10;
 }
 
 /**
@@ -96,45 +97,48 @@ export function calculateRothfuszHeatIndex(tempC: number, relativeHumidity: numb
 }
 
 /**
- * Summer Simmer Index (FMI warm weather formula)
- * For T >= 14.5 °C
+ * Summer Simmer Index as FMI computes it (FmiSummerSimmerIndex, NFmiMetMath.cpp).
+ * Returns the air temperature at or below 14.5 °C.
  * @param tempC Air temperature in °C
- * @param relativeHumidity Relative humidity in %
+ * @param relativeHumidity Relative humidity in % (0 - 100)
  */
 export function calculateSummerSimmerIndex(tempC: number, relativeHumidity: number): number {
-  if (tempC < 14.5) {
+  if (tempC <= 14.5) {
     return tempC;
   }
-  const tF = tempC * 1.8 + 32;
-  const ssiF = 1.98 * (tF - (0.55 - 0.0055 * relativeHumidity) * (tF - 58)) - 56.83;
-  const ssiC = (ssiF - 32) / 1.8;
-  return Math.round(ssiC * 10) / 10;
+  const rhRef = 0.5;
+  const r = relativeHumidity / 100;
+  const ssi =
+    (1.8 * tempC - 0.55 * (1 - r) * (1.8 * tempC - 26) - 0.55 * (1 - rhRef) * 26) /
+    (1.8 * (1 - 0.55 * (1 - rhRef)));
+  return Math.round(ssi * 10) / 10;
 }
 
 /**
- * Unified Apparent Temperature Selector
- * Applies FMI continuous feels-like formula for cold/windy conditions (T <= 10°C),
- * Rothfusz Heat Index for warm/humid conditions (T >= 20°C, RH >= 40%),
- * and linear transition in intermediate weather.
+ * FMI "Tuntuu kuin" temperature without the radiation term:
+ *   feels = T + (chill - T) + (SSI - T)
+ * as in FmiFeelsLikeTemperature. Needs temperature, wind (m/s) and humidity (%).
+ * Returns null when any input is missing, never a made-up number.
  */
 export function calculateApparentTemperature(
-  tempC: number,
-  windSpeedMs: number,
-  relativeHumidity: number = 70
-): number {
-  if (!Number.isFinite(tempC) || !Number.isFinite(windSpeedMs)) {
-    return 0;
+  tempC: number | null | undefined,
+  windSpeedMs: number | null | undefined,
+  relativeHumidity: number | null | undefined
+): number | null {
+  if (
+    tempC == null ||
+    windSpeedMs == null ||
+    relativeHumidity == null ||
+    !Number.isFinite(tempC) ||
+    !Number.isFinite(windSpeedMs) ||
+    !Number.isFinite(relativeHumidity)
+  ) {
+    return null;
   }
-
-  if (tempC <= 10.0 && windSpeedMs > 1.33) {
-    return calculateFmiFeelsLike(tempC, windSpeedMs);
-  }
-
-  if (tempC >= 20.0 && relativeHumidity >= 40) {
-    return calculateRothfuszHeatIndex(tempC, relativeHumidity);
-  }
-
-  return Math.round(tempC * 10) / 10;
+  const chill = calculateFmiFeelsLike(tempC, windSpeedMs);
+  const heat = calculateSummerSimmerIndex(tempC, relativeHumidity);
+  const feels = tempC + (chill - tempC) + (heat - tempC);
+  return Math.round(feels * 10) / 10;
 }
 
 /**
@@ -226,7 +230,8 @@ export function formatMatchdayWeatherBriefing(params: {
   } = params;
 
   const safeVenue = venueName || 'Kenttä';
-  const safeTime = kickoffTime ? kickoffTime.slice(11, 16) : '00:00';
+  // kickoffTime is UTC ISO; people read Helsinki time.
+  const safeTime = formatHelsinkiTime(kickoffTime) || '–';
   const safeTemp = temperatureC != null && Number.isFinite(temperatureC) ? temperatureC.toFixed(1) : '–';
   const safeFeels = feelsLikeC != null && Number.isFinite(feelsLikeC) ? feelsLikeC.toFixed(1) : '–';
   const safeWind = windSpeedMs != null && Number.isFinite(windSpeedMs) ? windSpeedMs.toFixed(1) : '–';

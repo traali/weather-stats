@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi, afterEach } from 'vitest';
 import {
   calculateWeatherBbox,
   buildWmsTileUrl,
@@ -84,8 +84,21 @@ describe('FMI Service & WMS Layer Projection Invariants', () => {
   });
 
   describe('Zero-Mock Fallback Invariant (Offline Resilience)', () => {
-    it('falls back seamlessly to verified cached snapshot on offline network', async () => {
-      // Offline / unresolvable address
+    afterEach(() => {
+      vi.unstubAllGlobals();
+    });
+
+    it('returns an explicit unavailable result when FMI times out', async () => {
+      vi.stubGlobal(
+        'fetch',
+        vi.fn().mockImplementation((_url: string, init?: RequestInit) =>
+          new Promise((_, reject) => {
+            init?.signal?.addEventListener('abort', () =>
+              reject(new DOMException('The operation was aborted due to timeout', 'TimeoutError'))
+            );
+          })
+        )
+      );
       const res = await fetchVenueWeatherForecast(
         {
           lat: testCoords.lat,
@@ -96,14 +109,16 @@ describe('FMI Service & WMS Layer Projection Invariants', () => {
         10 // very low timeout forces fallback
       );
 
-      expect(res.isCacheFallback).toBe(true);
+      expect(res.isCacheFallback).toBe(false);
       expect(res.available).toBe(false);
+      expect(res.errorFi).toBe('FMI ei vastannut ajoissa.');
       expect(res.venueId).toBe('vaiski');
       expect(res.temperatureC).toBeNull();
       expect(res.uiResourceUri).toContain('ui://weather/venue-card');
     });
 
-    it('returns deterministic lightning fallback without fabricating fake strikes', async () => {
+    it('returns unknown lightning without fabricating fake strikes when FMI is offline', async () => {
+      vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new TypeError('Failed to fetch')));
       const res = await fetchPitchLightningRisk(
         {
           lat: testCoords.lat,
@@ -113,7 +128,7 @@ describe('FMI Service & WMS Layer Projection Invariants', () => {
         10
       );
 
-      expect(res.isCacheFallback).toBe(true);
+      expect(res.isCacheFallback).toBe(false);
       expect(res.status).toBe('unknown');
       expect(res.strikes.length).toBe(0); // Zero fabricated strikes
       expect(res.suspendMatchRecommended).toBe(false);

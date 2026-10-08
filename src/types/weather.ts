@@ -34,9 +34,56 @@ export interface VenueWeatherForecastResult {
   windAdvisoryBadge?: string;
   /** False when FMI did not return a reading. Never fill this with a remembered September day. */
   available: boolean;
+  /** Always false: an old reading is never served as current. Kept for the v1 contract. */
   isCacheFallback: boolean;
   cacheTimestamp?: string;
+  /** FMI forecast valid time (UTC ISO) the values belong to. */
+  forecastTime?: string;
+  /** When the FMI request was made (UTC ISO). */
+  fetchedAt?: string;
+  /** Finnish reason shown when FMI did not answer. */
+  errorFi?: string;
   uiResourceUri: string;
+}
+
+/** One measured value with the FMI station and time it came from. */
+export interface ObservedValue {
+  value: number;
+  /** FMI observation time (UTC ISO). */
+  time: string;
+  stationName: string;
+  fmisid: string;
+  distanceKm: number;
+}
+
+export interface VenueObservationArgs {
+  lat: number;
+  lng: number;
+  /** Defaults to Date.now(). */
+  referenceTime?: string;
+  venueName?: string;
+}
+
+export interface VenueObservationResult {
+  venueName?: string;
+  coordinates: Coordinates;
+  /** False when FMI did not answer or no station had a fresh temperature. */
+  available: boolean;
+  /** Station the temperature came from. */
+  stationName?: string;
+  fmisid?: string;
+  distanceKm?: number;
+  /** FMI observation time of the temperature (UTC ISO). */
+  observedAt?: string;
+  temperature: ObservedValue | null;
+  windSpeed: ObservedValue | null;
+  windGust: ObservedValue | null;
+  /** ri_10min, mm/h */
+  precipitationIntensity: ObservedValue | null;
+  /** r_1h, mm over the last hour */
+  precipitation1h: ObservedValue | null;
+  fetchedAt: string;
+  errorFi?: string;
 }
 
 export interface PitchLightningRiskArgs {
@@ -70,8 +117,11 @@ export interface PitchLightningRiskResult {
   safetyAdvisoryFi: string;
   latestStrikeTimeIso?: string;
   strikes: LightningStrikeItem[];
+  /** Always false: an old lightning check is never served as current. */
   isCacheFallback: boolean;
   cacheTimestamp?: string;
+  /** When FMI answered the lightning query (UTC ISO). Missing when the check failed. */
+  checkedAt?: string;
   uiResourceUri: string;
 }
 
