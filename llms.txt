@@ -23,4 +23,4 @@ UI catalog: `docs/UI_COMPONENTS.md` (2026-09-26). Five components. Never invent 
 ## Contribution & Verification Guide
 - Always run `npm run check` before submitting changes.
 - Ensure all meteorological formulas have corresponding invariant tests.
-- Prohibit unrendered template placeholders (`[object Object]`, `[PVM]`, `undefined`, `null`, `NaN`).
+- Prohibit unrendered template placeholders and empty-value words printed as text.

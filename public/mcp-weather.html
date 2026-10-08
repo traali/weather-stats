@@ -167,23 +167,23 @@
       window.parent.postMessage({ type: 'mcp:ready', protocolVersion: '2026-01' }, '*');
     }
 
-    function num(v) {
-      return typeof v === 'number' && Number.isFinite(v) ? v : null;
+    function has(v) {
+      return typeof v === 'number' && Number.isFinite(v);
     }
 
-    // Every update replaces every field. A missing value is shown as '—', never 0 or NaN.
+    // Every update replaces every field. A missing value is shown as '—', never as 0.
     function updateView(data) {
       if (!data) return;
       document.getElementById('venueName').textContent = data.venueName || 'Pelipaikka';
-      const t = num(data.temperatureC);
-      document.getElementById('temp').textContent = t != null ? `${t.toFixed(1)}°C` : '—';
-      const f = num(data.feelsLikeC);
-      document.getElementById('feelsLike').textContent = f != null ? `Tuntuu kuin ${f.toFixed(1)}°C` : '';
-      const w = num(data.windSpeedMs);
-      const g = num(data.windGustMs);
-      document.getElementById('wind').textContent = w != null ? `${w.toFixed(1)}${g != null ? ` / ${g.toFixed(1)}` : ''} m/s` : '—';
-      const p = num(data.precipitationMmh);
-      document.getElementById('precip').textContent = p != null ? `${p.toFixed(1)} mm/h` : '—';
+      const t = data.temperatureC;
+      document.getElementById('temp').textContent = has(t) ? `${t.toFixed(1)}°C` : '—';
+      const f = data.feelsLikeC;
+      document.getElementById('feelsLike').textContent = has(f) ? `Tuntuu kuin ${f.toFixed(1)}°C` : '';
+      const w = data.windSpeedMs;
+      const g = data.windGustMs;
+      document.getElementById('wind').textContent = has(w) ? `${w.toFixed(1)}${has(g) ? ` / ${g.toFixed(1)}` : ''} m/s` : '—';
+      const p = data.precipitationMmh;
+      document.getElementById('precip').textContent = has(p) ? `${p.toFixed(1)} mm/h` : '—';
       const tb = document.getElementById('turfBadge');
       const turfKnown = data.turfConditionLabelFi && data.turfConditionLabelFi !== '—';
       tb.textContent = `Kenttä: ${turfKnown ? data.turfConditionLabelFi : '—'}`;

@@ -43,7 +43,7 @@ The canonical, tool-agnostic rule for all AI agents and contributors working in 
 ---
 
 ## §4 Security & Meteorological Integrity
-- **Zero Mock, Zero Stale:** When FMI times out, errors, or answers with something that is not a FeatureCollection, return `available: false` (forecast/observation) or lightning `status: 'unknown'` ("Salamatietoa ei saatu"). Never serve a remembered reading as current, never show a failed lightning check as clear, never show a missing (NaN) value as 0.
+- **Zero Mock, Zero Stale:** When FMI times out, errors, or answers with something that is not a FeatureCollection, return `available: false` (forecast/observation) or lightning `status: 'unknown'` ("Salamatietoa ei saatu"). Never serve a remembered reading as current, never show a failed lightning check as clear, never show a missing (`NaN`) value as 0.
 - **Zero Secrets:** Never commit credentials, tokens, or environment keys.
 - **Defensive API Ingestion:** Validate and sanitize all external XML/GML/JSON payloads before rendering.
 - **Rate-Limiting & Timeouts:** All remote API calls must use `AbortController` (5000 ms ceiling).
