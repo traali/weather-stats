@@ -7,10 +7,10 @@ import { setupMockDom } from './setupDom';
 const fixture = (name: string) =>
   readFileSync(fileURLToPath(new URL(`./fixtures/${name}`, import.meta.url)), 'utf-8');
 
-/** Real FMI responses recorded 2026-10-08. Tests never call opendata.fmi.fi (it made CI flaky). */
-const FORECAST_XML = fixture('fmi-forecast-vaiski-2026-10-08T1500Z.xml');
+/** Real FMI responses (forecast recorded 2026-10-17, lightning 2026-10-08). Tests never call opendata.fmi.fi (it made CI flaky). */
+const FORECAST_XML = fixture('fmi-edited-forecast-vaiski-2026-10-17T1500Z.xml');
 const LIGHTNING_EMPTY_XML = fixture('fmi-lightning-vaiski-empty-2026-10-08.xml');
-const KICKOFF = '2026-10-08T15:00:00.000Z';
+const KICKOFF = '2026-10-17T15:00:00.000Z';
 
 describe('WebMCP Tri-Mount Registry & Model Context Standards', () => {
   beforeEach(() => {
@@ -18,7 +18,7 @@ describe('WebMCP Tri-Mount Registry & Model Context Standards', () => {
       'fetch',
       vi.fn(async (url: string | URL) => {
         const u = String(url);
-        if (u.includes('harmonie')) return new Response(FORECAST_XML, { status: 200 });
+        if (u.includes('fmi::forecast::edited::weather::scandinavia::point::simple')) return new Response(FORECAST_XML, { status: 200 });
         if (u.includes('lightning')) return new Response(LIGHTNING_EMPTY_XML, { status: 200 });
         throw new Error(`unexpected network call in test: ${u}`);
       })
@@ -80,8 +80,8 @@ describe('WebMCP Tri-Mount Registry & Model Context Standards', () => {
     const registry = registerWeatherWebMCP()!;
 
     const result = (await registry.executeTool('get_venue_weather_forecast', {
-      lat: 60.1873,
-      lng: 24.9258,
+      lat: 60.1872,
+      lng: 24.9232,
       kickoffTime: KICKOFF,
       venueId: 'vaiski',
     })) as {
@@ -92,8 +92,8 @@ describe('WebMCP Tri-Mount Registry & Model Context Standards', () => {
       uiResourceUri: string;
     };
 
-    // FMI Harmonie value for Väiski at 15:00Z in the recorded response.
-    expect(result.temperatureC).toBe(12.4);
+    // FMI edited forecast for Väiski at 15:00Z in the recorded response (9.53 °C).
+    expect(result.temperatureC).toBe(9.5);
     expect(typeof result.feelsLikeC).toBe('number');
     expect(['dry', 'slick', 'frozen', 'snowy']).toContain(result.turfCondition);
     expect(result.uiResourceUri).toContain('ui://weather/venue-card');
@@ -142,8 +142,8 @@ describe('WebMCP Tri-Mount Registry & Model Context Standards', () => {
     const mcpRes = await registry.callTool({
       name: 'get_venue_weather_forecast',
       arguments: {
-        lat: 60.1873,
-        lng: 24.9258,
+        lat: 60.1872,
+        lng: 24.9232,
         kickoffTime: KICKOFF,
       },
     });

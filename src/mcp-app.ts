@@ -227,7 +227,7 @@ export function registerWeatherWebMCP(): ModelContextRegistry | undefined {
   registry.registerTool({
     name: 'get_venue_weather_forecast',
     description:
-      'Queries localized FMI Harmonie point forecast for venue coordinates and kickoff time. Returns structured temperature, feels-like wind chill, wind gusts, precipitation timeline, turf condition (frozen/slick/dry), and UI widget resource URI.',
+      'Queries the official FMI edited point forecast for venue coordinates and kickoff time (gust = HourlyMaximumGust). Returns structured temperature, feels-like wind chill, wind gusts, precipitation timeline, turf condition (frozen/slick/dry), and UI widget resource URI.',
     readOnlyHint: true,
     untrustedContentHint: false,
     inputSchema: {

@@ -2,7 +2,9 @@
  * Tests built on real FMI open data responses saved in tests/fixtures/
  * (fetched from opendata.fmi.fi/wfs with the same queries the app makes).
  *
- * - fmi-forecast-vaiski-2026-10-08T1500Z.xml   Harmonie point forecast, Väiski, kickoff 18.00 Helsinki
+ * - fmi-edited-forecast-vaiski-2026-10-17T1500Z.xml       FMI edited point forecast, Väiski (Taka-Töölö), kickoff 18.00 Helsinki
+ * - fmi-edited-forecast-lauttasaari-2026-10-17T1500Z.xml  same query, Lauttasaari
+ *   (recorded 2026-10-17 10:23Z with the exact URL buildForecastUrl makes)
  * - fmi-observations-helsinki-2026-10-08T040425Z.xml  timevaluepair stations within 25 km of Väiski
  *   (real "NaN" values: Harmaja and Sipoo Itätoukki have no ri_10min / r_1h)
  * - fmi-lightning-vaiski-2026-06-25T1825Z.xml  real thunderstorm north of Helsinki, 46 flashes x 4 rows
@@ -38,14 +40,15 @@ import { SatelliteEmbedDrawer } from '../src/components/SatelliteEmbedDrawer';
 const fixture = (name: string) =>
   readFileSync(fileURLToPath(new URL(`./fixtures/${name}`, import.meta.url)), 'utf-8');
 
-const FORECAST_XML = fixture('fmi-forecast-vaiski-2026-10-08T1500Z.xml');
+const FORECAST_XML = fixture('fmi-edited-forecast-vaiski-2026-10-17T1500Z.xml');
+const FORECAST_LAUTTASAARI_XML = fixture('fmi-edited-forecast-lauttasaari-2026-10-17T1500Z.xml');
 const OBS_XML = fixture('fmi-observations-helsinki-2026-10-08T040425Z.xml');
 const LIGHTNING_XML = fixture('fmi-lightning-vaiski-2026-06-25T1825Z.xml');
 const LIGHTNING_EMPTY_XML = fixture('fmi-lightning-vaiski-empty-2026-10-08.xml');
 const EXCEPTION_XML = fixture('fmi-exception-bad-bbox.xml');
 
 const VAISKI = VENUES.vaiski;
-const KICKOFF_18 = '2026-10-08T15:00:00.000Z'; // 18.00 Helsinki (EEST, UTC+3)
+const KICKOFF_18 = '2026-10-17T15:00:00.000Z'; // 18.00 Helsinki (EEST, UTC+3)
 const OBS_REF = '2026-10-08T04:04:25Z';
 
 const forecastArgs = {
@@ -69,41 +72,73 @@ describe('Helsinki time', () => {
   });
 });
 
-describe('Harmonie forecast (real FMI sample)', () => {
-  it('requests explicit parameters including Precipitation1h (mm/h) and no milliseconds in times', () => {
+describe('FMI edited point forecast (real FMI samples)', () => {
+  it('asks FMI for its official edited point forecast at the pitch coordinates, gust from HourlyMaximumGust', () => {
     const url = buildForecastUrl(forecastArgs);
-    expect(url).toContain('storedquery_id=fmi::forecast::harmonie::surface::point::simple');
-    expect(url).toContain('parameters=Temperature,WindSpeedMS,WindGust,Humidity,Precipitation1h');
-    expect(url).toContain('starttime=2026-10-08T14%3A30%3A00Z');
-    expect(url).toContain('endtime=2026-10-08T17%3A00%3A00Z');
+    expect(url).toContain('storedquery_id=fmi::forecast::edited::weather::scandinavia::point::simple');
+    expect(url).not.toContain('harmonie');
+    expect(url).toContain('parameters=Temperature,WindSpeedMS,HourlyMaximumGust,Humidity,Precipitation1h');
+    expect(url).toContain('timestep=60');
+    expect(url).toContain('starttime=2026-10-17T14%3A00%3A00Z');
+    expect(url).toContain('endtime=2026-10-17T17%3A00%3A00Z');
     expect(url).toContain(`latlon=${VAISKI.coords.lat},${VAISKI.coords.lng}`);
   });
 
-  it('uses the time step at kickoff, not the first row 30 min earlier', () => {
+  it('pitch coordinates are the ones FMI answers for (Taka-Töölö and Lauttasaari)', () => {
+    expect(FORECAST_XML).toContain('<gml:pos>60.18720 24.92320 </gml:pos>');
+    expect(FORECAST_LAUTTASAARI_XML).toContain('<gml:pos>60.16330 24.86620 </gml:pos>');
+    expect(buildForecastUrl({ ...forecastArgs, lat: VENUES.lauttasaari.coords.lat, lng: VENUES.lauttasaari.coords.lng }))
+      .toContain('latlon=60.1633,24.8662');
+  });
+
+  it('Väiski: shows the edited forecast hour at kickoff (4.9 m/s, gust 9.8), not Harmonie', () => {
     const res = buildForecastFromXml(FORECAST_XML, forecastArgs);
     expect(res.available).toBe(true);
-    expect(res.forecastTime).toBe('2026-10-08T15:00:00Z');
-    // FMI values at 15:00Z in the sample: 12.4 °C, 7.02 m/s, gust 11.7, RH 77.8, 0.0 mm/h
-    expect(res.temperatureC).toBe(12.4);
-    expect(res.windSpeedMs).toBe(7.0);
-    expect(res.windGustMs).toBe(11.7);
+    expect(res.forecastTime).toBe('2026-10-17T15:00:00Z');
+    // FMI edited forecast at 15:00Z: 9.53 °C, 4.9 m/s, HourlyMaximumGust 9.8, RH 74.3, 0.0 mm/h.
+    // (Harmonie for the same point and hour said 5.29 m/s, gust 10.2.)
+    expect(res.temperatureC).toBe(9.5);
+    expect(res.windSpeedMs).toBe(4.9);
+    expect(res.windGustMs).toBe(9.8);
     expect(res.precipitationMmh).toBe(0);
-    // FMI feels-like with m/s wind: 8.5 °C
-    expect(res.feelsLikeC).toBe(8.5);
-    expect(res.windAdvisoryBadge).toBe('🌬️ Puuskainen');
-    expect(res.rainTimeline).toHaveLength(11);
+    // FMI feels-like (wind chill + summer simmer, no radiation) from 9.53 °C, 4.9 m/s, RH 74.3
+    expect(res.feelsLikeC).toBe(5.9);
+    expect(res.windAdvisoryBadge).toBeUndefined();
+    expect(res.rainTimeline).toHaveLength(4);
     expect(res.isCacheFallback).toBe(false);
+  });
+
+  it('Lauttasaari: 5.1 m/s, gust 10.0 from HourlyMaximumGust', () => {
+    const args = { ...forecastArgs, lat: VENUES.lauttasaari.coords.lat, lng: VENUES.lauttasaari.coords.lng, venueId: 'lauttasaari', venueName: VENUES.lauttasaari.venueName };
+    const res = buildForecastFromXml(FORECAST_LAUTTASAARI_XML, args);
+    expect(res.forecastTime).toBe('2026-10-17T15:00:00Z');
+    // FMI edited forecast at 15:00Z: 9.63 °C, 5.1 m/s, HourlyMaximumGust 10.0 (Harmonie: 5.77 m/s, gust 10.2).
+    expect(res.temperatureC).toBe(9.6);
+    expect(res.windSpeedMs).toBe(5.1);
+    expect(res.windGustMs).toBe(10);
+    expect(res.windAdvisoryBadge).toBe('🌬️ Puuskainen');
+  });
+
+  it('an empty WindGust (as the edited forecast sends it) is never used as the gust', () => {
+    const withEmptyWindGust = FORECAST_XML.replace(
+      '<BsWfs:ParameterName>HourlyMaximumGust</BsWfs:ParameterName>',
+      '<BsWfs:ParameterName>WindGust</BsWfs:ParameterName>'
+    );
+    const res = buildForecastFromXml(withEmptyWindGust, forecastArgs);
+    expect(res.windGustMs).toBe(9.8); // 14:00Z row lost its gust; 15:00Z still reads HourlyMaximumGust
+    const allWindGust = FORECAST_XML.replace(/HourlyMaximumGust/g, 'WindGust');
+    expect(buildForecastFromXml(allWindGust, forecastArgs).windGustMs).toBeNull();
   });
 
   it('a NaN gust from FMI stays missing: null in data, "—" on screen, never 0 or NaN', () => {
     const xml = FORECAST_XML.replace(
-      /(<BsWfs:ParameterName>WindGust<\/BsWfs:ParameterName>\s*<BsWfs:ParameterValue>)[^<]*/g,
+      /(<BsWfs:ParameterName>HourlyMaximumGust<\/BsWfs:ParameterName>\s*<BsWfs:ParameterValue>)[^<]*/g,
       '$1NaN'
     );
     const res = buildForecastFromXml(xml, forecastArgs);
     expect(res.available).toBe(true);
     expect(res.windGustMs).toBeNull();
-    expect(res.windSpeedMs).toBe(7.0);
+    expect(res.windSpeedMs).toBe(4.9);
     expect(res.windAdvisoryBadge).toBeUndefined();
 
     const html = renderToStaticMarkup(React.createElement(HeroMatchCardWeather, { forecast: res }));
@@ -130,7 +165,7 @@ describe('Harmonie forecast (real FMI sample)', () => {
   });
 
   it('kickoff outside the returned forecast window is unavailable, not the nearest old value', () => {
-    const res = buildForecastFromXml(FORECAST_XML, { ...forecastArgs, kickoffTime: '2026-10-08T20:00:00.000Z' });
+    const res = buildForecastFromXml(FORECAST_XML, { ...forecastArgs, kickoffTime: '2026-10-17T20:00:00.000Z' });
     expect(res.available).toBe(false);
     expect(res.temperatureC).toBeNull();
   });
@@ -146,7 +181,7 @@ describe('Harmonie forecast (real FMI sample)', () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValueOnce(new Response(FORECAST_XML)).mockRejectedValueOnce(new TypeError('offline')));
     const first = await fetchVenueWeatherForecast(forecastArgs);
     const second = await fetchVenueWeatherForecast(forecastArgs);
-    expect(first.temperatureC).toBe(12.4);
+    expect(first.temperatureC).toBe(9.5);
     expect(second.available).toBe(false);
     expect(second.temperatureC).toBeNull();
     expect(second.isCacheFallback).toBe(false);
