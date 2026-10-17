@@ -280,7 +280,7 @@ export function App() {
 
         <p className="text-[11px] text-gray-500 px-1">
           Lähde: Ilmatieteen laitoksen avoin data (opendata.fmi.fi). Havainto on lähimmältä FMI-asemalta,
-          ennuste Harmonie-mallista kentän koordinaateille. Jos FMI ei vastaa, lukemia ei näytetä eikä arvata.
+          ennuste on FMI:n meteorologien muokkaama pisteennuste kentän koordinaateille. Jos FMI ei vastaa, lukemia ei näytetä eikä arvata.
         </p>
       </main>
 

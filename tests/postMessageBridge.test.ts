@@ -9,9 +9,9 @@ const SLA_MS = process.env.CI ? 2500 : 500;
 
 describe('Cross-Frame postMessage Bridge & 500ms SLA Verification', () => {
   beforeEach(() => {
-    // Real FMI Harmonie response (Väiski, 2026-10-08). No network in tests.
+    // Real FMI edited point forecast response (Väiski, recorded 2026-10-17). No network in tests.
     const xml = readFileSync(
-      fileURLToPath(new URL('./fixtures/fmi-forecast-vaiski-2026-10-08T1500Z.xml', import.meta.url)),
+      fileURLToPath(new URL('./fixtures/fmi-edited-forecast-vaiski-2026-10-17T1500Z.xml', import.meta.url)),
       'utf-8'
     );
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(new Response(xml, { status: 200 })));
@@ -81,7 +81,7 @@ describe('Cross-Frame postMessage Bridge & 500ms SLA Verification', () => {
           arguments: {
             lat: 60.1872,
             lng: 24.9232,
-            kickoffTime: '2026-10-08T15:00:00.000Z',
+            kickoffTime: '2026-10-17T15:00:00.000Z',
             venueId: 'vaiski',
           },
         },

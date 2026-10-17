@@ -2,8 +2,11 @@
  * FMI Open Data Service (WFS & WMS)
  *
  * Integrates directly with Finnish Meteorological Institute open data (opendata.fmi.fi/wfs):
- * - Harmonie point forecast: fmi::forecast::harmonie::surface::point::simple
- *   (Temperature °C, WindSpeedMS m/s, WindGust m/s, Humidity %, Precipitation1h mm/h)
+ * - FMI's official edited point forecast: fmi::forecast::edited::weather::scandinavia::point::simple
+ *   (Temperature °C, WindSpeedMS m/s, HourlyMaximumGust m/s, Humidity %, Precipitation1h mm/h).
+ *   This is the forecast FMI publishes after its meteorologists edit it. Its WindGust is empty
+ *   (NaN), so the gust comes from HourlyMaximumGust. Raw Harmonie model output is not used:
+ *   it differs from FMI's own forecast (on 2026-10-08 15Z by about 1 m/s of wind).
  * - Station observations: fmi::observations::weather::timevaluepair, nearest station by distance
  *   (t2m °C, ws_10min m/s, wg_10min m/s, ri_10min mm/h, r_1h mm)
  * - Lightning: fmi::observations::lightning::simple (4 rows per flash, grouped back to one)
@@ -50,8 +53,13 @@ export const FMI_ENDPOINTS = {
 
 export const FMI_TIMEOUT_MS = 5000;
 
-/** Forecast parameters requested from Harmonie. Precipitation1h is mm/h (sum over the previous hour). */
-export const FORECAST_PARAMETERS = ['Temperature', 'WindSpeedMS', 'WindGust', 'Humidity', 'Precipitation1h'] as const;
+/** FMI's official edited point forecast (hourly). */
+export const FORECAST_STORED_QUERY = 'fmi::forecast::edited::weather::scandinavia::point::simple';
+/**
+ * Parameters requested from the edited forecast. Precipitation1h is mm/h (sum over the previous hour).
+ * HourlyMaximumGust is the gust: WindGust is NaN in the edited forecast.
+ */
+export const FORECAST_PARAMETERS = ['Temperature', 'WindSpeedMS', 'HourlyMaximumGust', 'Humidity', 'Precipitation1h'] as const;
 /** Observation parameters. ri_10min is mm/h, r_1h is mm in the last hour. */
 export const OBSERVATION_PARAMETERS = ['t2m', 'ws_10min', 'wg_10min', 'ri_10min', 'r_1h'] as const;
 /** An observation older than this is not shown as current. */
@@ -235,7 +243,7 @@ export function pickForecastTime(times: string[], kickoffIso: string): string | 
 
 const round1 = (n: number | null): number | null => (n == null ? null : Math.round(n * 10) / 10);
 
-/** Builds the forecast result from an FMI Harmonie simple-feature response. */
+/** Builds the forecast result from FMI's edited point forecast (simple-feature response). */
 export function buildForecastFromXml(
   xmlText: string,
   args: VenueWeatherForecastArgs,
@@ -252,7 +260,7 @@ export function buildForecastFromXml(
   const row = rows.get(at) ?? {};
   const temp = row.Temperature ?? null;
   const wind = row.WindSpeedMS ?? null;
-  const gust = row.WindGust ?? null;
+  const gust = row.HourlyMaximumGust ?? null;
   const humidity = row.Humidity ?? null;
   const rain = row.Precipitation1h ?? null;
 
@@ -299,13 +307,14 @@ export function buildForecastFromXml(
 
 export function buildForecastUrl(args: VenueWeatherForecastArgs): string {
   const kickoffMs = new Date(args.kickoffTime).getTime();
-  const start = toFmiTime(kickoffMs - 30 * 60 * 1000);
+  // Hourly forecast: start an hour early so the hour nearest kickoff is always included.
+  const start = toFmiTime(kickoffMs - 60 * 60 * 1000);
   const end = toFmiTime(kickoffMs + 120 * 60 * 1000);
-  return `${FMI_ENDPOINTS.wfs}?service=WFS&version=2.0.0&request=getFeature&storedquery_id=fmi::forecast::harmonie::surface::point::simple&latlon=${args.lat},${args.lng}&starttime=${encodeURIComponent(start)}&endtime=${encodeURIComponent(end)}&timestep=15&parameters=${FORECAST_PARAMETERS.join(',')}`;
+  return `${FMI_ENDPOINTS.wfs}?service=WFS&version=2.0.0&request=getFeature&storedquery_id=${FORECAST_STORED_QUERY}&latlon=${args.lat},${args.lng}&starttime=${encodeURIComponent(start)}&endtime=${encodeURIComponent(end)}&timestep=60&parameters=${FORECAST_PARAMETERS.join(',')}`;
 }
 
 /**
- * Fetches the Harmonie point forecast for the kickoff time.
+ * Fetches FMI's edited point forecast for the kickoff time.
  * On any failure: an explicit unavailable result. Never an old reading.
  */
 export async function fetchVenueWeatherForecast(
