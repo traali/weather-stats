@@ -21,7 +21,8 @@ if (mode === 'tokens') {
     if (file.includes('node_modules') || file.includes('.git') || file.includes('dist')) continue;
     const lower = file.toLowerCase();
     if (lower.includes('test') || lower.includes('git-guard')) continue;
-    const isCode = /\.(ts|tsx|js|jsx|mjs|cjs)$/i.test(file);
+    // JSON `null` is a real value (e.g. federation.neighbors.json "taso": null); judge JSON like code.
+    const isCode = /\.(ts|tsx|js|jsx|mjs|cjs|json)$/i.test(file);
     const isMarkdown = /\.md$/i.test(file);
     const lines = readFileSync(file, 'utf8').split('\n');
     let inMd = false;
